@@ -1,3 +1,4 @@
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -12,13 +13,23 @@ import static org.junit.Assert.assertThat;
 
 public class UserDaoTest {
 
-    @Test
-    public void addAndGet() throws SQLException {
+    private UserDao dao;
+
+    @Before
+    public void setUp(){
         ApplicationContext context
                 = new ClassPathXmlApplicationContext("applicationContext.xml");
         UserDao dao = context.getBean("userDao", UserDao.class);
+        this.dao = dao;
+    }
 
-        dao.deleteAll();;
+    @Test
+    public void addAndGet() throws SQLException {
+//        ApplicationContext context
+//                = new ClassPathXmlApplicationContext("applicationContext.xml");
+//        UserDao dao = context.getBean("userDao", UserDao.class);
+
+        dao.deleteAll();
         assertThat(dao.getCount(), is(0));
 
         User user1 = new User("1","aa","pp1");
@@ -40,9 +51,9 @@ public class UserDaoTest {
 
     @Test(expected = EmptyResultDataAccessException.class)
     public void getUserFailure() {
-        ApplicationContext context
-                = new ClassPathXmlApplicationContext("applicationContext.xml");
-        UserDao dao = context.getBean("userDao", UserDao.class);
+//        ApplicationContext context
+//                = new ClassPathXmlApplicationContext("applicationContext.xml");
+//        UserDao dao = context.getBean("userDao", UserDao.class);
 
         dao.deleteAll();
         assertThat(dao.getCount(), is(0));
@@ -53,10 +64,10 @@ public class UserDaoTest {
 
     @Test
     public void count() throws SQLException {
-        ApplicationContext context
-                = new ClassPathXmlApplicationContext("applicationContext.xml");
-
-        UserDao dao = context.getBean("userDao", UserDao.class);
+//        ApplicationContext context
+//                = new ClassPathXmlApplicationContext("applicationContext.xml");
+//        UserDao dao = context.getBean("userDao", UserDao.class);
+        
         User user1 = new User("1","aa","p123");
         User user2 = new User("2","bb","p124");
         User user3 = new User("3","cc","p125");
