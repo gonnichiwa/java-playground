@@ -13,24 +13,22 @@ import java.util.ArrayList;
 public class UserDao {
     private ConnectionMaker connectionMaker;
 
-//    public UserDao() {
-//        connectionMaker = new NConnectionMaker(); // 이것 조차도 의존이다
-//        // UserDao사용하고 싶은 아이는 클라이언트(여기서는 Userdao사용하는 main())다.
-//        // 클라이언트가 UserDao쓸때, NConnectionMaker쓸지 DConnectionMaker쓸지 정해라.
-//        // 어떻게?
-//    }
+    private DataSource dataSource;
 
-    // 요렇게
     public UserDao(){}
 
     public void setConnectionMaker(ConnectionMaker connectionMaker) {
         this.connectionMaker = connectionMaker;
     }
 
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
     public void add(User user) throws SQLException {
         Connection c = null;
         try {
-            c = connectionMaker.getConnection();
+            c = dataSource.getConnection();
             PreparedStatement ps = c.prepareStatement("insert into users(id,name,password) values (?,?,?)");
             ps.setString(1, user.getId());
             ps.setString(2, user.getName());
@@ -41,8 +39,6 @@ public class UserDao {
             ps.close();
             c.close();
 
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -54,7 +50,7 @@ public class UserDao {
         User user = new User();
 
         try {
-            c = connectionMaker.getConnection();
+            c = dataSource.getConnection();
             PreparedStatement ps = c.prepareStatement("select * from users where id = ?");
             ps.setString(1, id);
 
@@ -66,7 +62,7 @@ public class UserDao {
                 user.setPassword(rs.getString("password"));
             }
 
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 
@@ -76,7 +72,7 @@ public class UserDao {
         Connection c = null;
         ArrayList<User> users = new ArrayList<>();
         try {
-            c = connectionMaker.getConnection();
+            c = dataSource.getConnection();
             PreparedStatement ps = c.prepareStatement("select * from users");
 
             ResultSet rs = ps.executeQuery();
@@ -93,7 +89,7 @@ public class UserDao {
             c.close();
 
 
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return users;

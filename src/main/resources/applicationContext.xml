@@ -4,9 +4,17 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
 http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
+    <bean id="myDataSource" class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
+        <property name="driverClass" value="org.mariadb.jdbc.Driver"/>
+        <property name="url" value="jdbc:mariadb://localhost:3306/springbook"/>
+        <property name="username" value="root"/>
+        <property name="password" value="aidaboat24"/>
+    </bean>
+
     <bean id="myConnectionMaker" class="springbook.user.dao.CountingConnectionMaker"/>
 
     <bean id="userDao" class="springbook.user.dao.UserDao">
         <property name="connectionMaker" ref="myConnectionMaker"/>
+        <property name="dataSource" ref="myDataSource"/>
     </bean>
 </beans>
