@@ -15,12 +15,22 @@ public class UserDaoTest {
 
     private UserDao dao;
 
+    // fixture : 테스트에 필요한 정보나 오브젝트
+    private User user1;
+    private User user2;
+    private User user3;
+
     @Before
     public void setUp(){
         ApplicationContext context
                 = new ClassPathXmlApplicationContext("applicationContext.xml");
         UserDao dao = context.getBean("userDao", UserDao.class);
         this.dao = dao;
+
+        this.user1 = new User("1","aa","p123");
+        this.user2 = new User("2","bb","p124");
+        this.user3 = new User("3","cc","p125");
+
     }
 
     @Test
@@ -32,8 +42,8 @@ public class UserDaoTest {
         dao.deleteAll();
         assertThat(dao.getCount(), is(0));
 
-        User user1 = new User("1","aa","pp1");
-        User user2 = new User("2","bb","pp2");
+//        User user1 = new User("1","aa","pp1");
+//        User user2 = new User("2","bb","pp2");
 
         dao.add(user1);
         dao.add(user2);
@@ -67,10 +77,10 @@ public class UserDaoTest {
 //        ApplicationContext context
 //                = new ClassPathXmlApplicationContext("applicationContext.xml");
 //        UserDao dao = context.getBean("userDao", UserDao.class);
-        
-        User user1 = new User("1","aa","p123");
-        User user2 = new User("2","bb","p124");
-        User user3 = new User("3","cc","p125");
+
+//        User user1 = new User("1","aa","p123");
+//        User user2 = new User("2","bb","p124");
+//        User user3 = new User("3","cc","p125");
 
         dao.deleteAll();
         assertThat(dao.getCount(), is(0));
