@@ -1,5 +1,6 @@
 package springbook.user.dao;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import springbook.user.ConnectionMaker;
 import springbook.user.User;
 
@@ -47,7 +48,7 @@ public class UserDao {
 
     public User get(String id){
         Connection c = null;
-        User user = new User();
+        User user = null;
 
         try {
             c = dataSource.getConnection();
@@ -61,6 +62,9 @@ public class UserDao {
                 user.setName(rs.getString("name"));
                 user.setPassword(rs.getString("password"));
             }
+
+            // 아래 주석해제 시 : Test/getUserFailure() 성공처리됨.
+            if(user == null) throw new EmptyResultDataAccessException(1);
 
         } catch (SQLException e) {
             throw new RuntimeException(e);

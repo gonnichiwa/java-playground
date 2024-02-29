@@ -1,6 +1,7 @@
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.dao.EmptyResultDataAccessException;
 import springbook.user.User;
 import springbook.user.dao.UserDao;
 
@@ -35,6 +36,19 @@ public class UserDaoTest {
         assertThat(getuser2.getName(), is(user2.getName()));
         assertThat(getuser2.getPassword(), is(user2.getPassword()));
         
+    }
+
+    @Test(expected = EmptyResultDataAccessException.class)
+    public void getUserFailure() {
+        ApplicationContext context
+                = new ClassPathXmlApplicationContext("applicationContext.xml");
+        UserDao dao = context.getBean("userDao", UserDao.class);
+
+        dao.deleteAll();
+        assertThat(dao.getCount(), is(0));
+
+        dao.get("unknown_id");
+
     }
 
     @Test
