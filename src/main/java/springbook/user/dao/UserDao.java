@@ -29,22 +29,16 @@ public class UserDao {
     }
 
     public void add(User user) throws SQLException {
-        // 로컬클래스화
-        class AddStatement implements StatementStrategy {
-            @Override
-            public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
-                PreparedStatement ps = null;
-                String sql = "insert into users values (?,?,?)";
-                ps = c.prepareStatement(sql);
-
-                ps.setString(1, user.getId());
-                ps.setString(2, user.getName());
-                ps.setString(3, user.getPassword());
-
-                return ps;
-            }
-        }
-        StatementStrategy st = new AddStatement();
+        // 익명클래스화
+        StatementStrategy st = c -> {
+            PreparedStatement ps = null;
+            String sql = "insert into users values (?,?,?)";
+            ps = c.prepareStatement(sql);
+            ps.setString(1, user.getId());
+            ps.setString(2, user.getName());
+            ps.setString(3, user.getPassword());
+            return ps;
+        };
         jdbcContextWithStatementStrategy(st);
     }
 
