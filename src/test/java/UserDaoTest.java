@@ -1,8 +1,14 @@
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import springbook.user.DaoFactory;
 import springbook.user.User;
 import springbook.user.dao.UserDao;
 
@@ -11,7 +17,12 @@ import java.sql.SQLException;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = "/applicationContext.xml")
 public class UserDaoTest {
+
+    @Autowired
+    private ApplicationContext context;
 
     private UserDao dao;
 
@@ -22,10 +33,10 @@ public class UserDaoTest {
 
     @Before
     public void setUp(){
-        ApplicationContext context
-                = new ClassPathXmlApplicationContext("applicationContext.xml");
-        UserDao dao = context.getBean("userDao", UserDao.class);
-        this.dao = dao;
+//        ApplicationContext context
+//                = new ClassPathXmlApplicationContext("applicationContext.xml");
+//        ApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class);
+        this.dao = context.getBean("userDao", UserDao.class);
 
         this.user1 = new User("1","aa","p123");
         this.user2 = new User("2","bb","p124");
