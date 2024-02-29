@@ -1,4 +1,6 @@
-package springbook.user.dao;
+package springbook.user.dao.statement;
+
+import springbook.user.dao.statement.StatementStrategy;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
