@@ -85,7 +85,7 @@ public class UserDaoTest {
     }
 
     @Test(expected = EmptyResultDataAccessException.class)
-    public void getUserFailure() {
+    public void getUserFailure() throws SQLException {
 //        ApplicationContext context
 //                = new ClassPathXmlApplicationContext("applicationContext.xml");
 //        UserDao dao = context.getBean("userDao", UserDao.class);
