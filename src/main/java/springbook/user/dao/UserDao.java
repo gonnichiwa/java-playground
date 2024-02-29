@@ -3,7 +3,6 @@ package springbook.user.dao;
 import org.springframework.dao.EmptyResultDataAccessException;
 import springbook.user.ConnectionMaker;
 import springbook.user.User;
-import springbook.user.dao.statement.AddStatement;
 import springbook.user.dao.statement.DeleteAllStatement;
 import springbook.user.dao.statement.StatementStrategy;
 
@@ -30,8 +29,23 @@ public class UserDao {
     }
 
     public void add(User user) throws SQLException {
-        StatementStrategy stmt = new AddStatement(user);
-        jdbcContextWithStatementStrategy(stmt);
+        // 로컬클래스화
+        class AddStatement implements StatementStrategy {
+            @Override
+            public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
+                PreparedStatement ps = null;
+                String sql = "insert into users values (?,?,?)";
+                ps = c.prepareStatement(sql);
+
+                ps.setString(1, user.getId());
+                ps.setString(2, user.getName());
+                ps.setString(3, user.getPassword());
+
+                return ps;
+            }
+        }
+        StatementStrategy st = new AddStatement();
+        jdbcContextWithStatementStrategy(st);
     }
 
     public User get(String id){
