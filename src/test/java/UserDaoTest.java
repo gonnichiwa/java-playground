@@ -6,12 +6,15 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import springbook.user.DaoFactory;
 import springbook.user.User;
 import springbook.user.dao.UserDao;
 
+import javax.sql.DataSource;
 import java.sql.SQLException;
 
 import static org.hamcrest.core.Is.is;
@@ -19,11 +22,13 @@ import static org.junit.Assert.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "/applicationContext.xml")
+@DirtiesContext
 public class UserDaoTest {
 
     @Autowired
     private ApplicationContext context;
 
+    @Autowired
     private UserDao dao;
 
     // fixture : 테스트에 필요한 정보나 오브젝트
@@ -33,10 +38,19 @@ public class UserDaoTest {
 
     @Before
     public void setUp(){
-//        ApplicationContext context
-//                = new ClassPathXmlApplicationContext("applicationContext.xml");
+        ApplicationContext context
+                = new ClassPathXmlApplicationContext("applicationContext.xml");
 //        ApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class);
         this.dao = context.getBean("userDao", UserDao.class);
+
+        DataSource dataSource = new SingleConnectionDataSource(
+                "org.mariadb.jdbc.Driver",
+                "jdbc:mariadb://localhost:3306/springbookTestDB",
+                "root",
+                "aidaboat24",
+                true
+        );
+        dao.setDataSource(dataSource);
 
         this.user1 = new User("1","aa","p123");
         this.user2 = new User("2","bb","p124");
