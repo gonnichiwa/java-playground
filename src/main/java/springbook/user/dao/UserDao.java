@@ -94,4 +94,38 @@ public class UserDao {
         }
         return users;
     }
+
+    public void deleteAll() {
+        try {
+            Connection c = dataSource.getConnection();
+            PreparedStatement ps = c.prepareStatement("delete from users");
+            ps.executeUpdate();
+
+            ps.close();
+            c.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public int getCount(){
+        Connection c = null;
+        try {
+            c = dataSource.getConnection();
+            PreparedStatement ps = c.prepareStatement("select count(*) as count from users");
+            ResultSet rs = ps.executeQuery();
+
+            rs.next();
+            int count = rs.getInt("count");
+
+            rs.close();
+            ps.close();
+            c.close();
+
+            return count;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
