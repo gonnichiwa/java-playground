@@ -38,8 +38,8 @@ public class UserDaoTest {
 
     @Before
     public void setUp(){
-        ApplicationContext context
-                = new ClassPathXmlApplicationContext("applicationContext.xml");
+//        ApplicationContext context
+//                = new ClassPathXmlApplicationContext("applicationContext.xml");
 //        ApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class);
         this.dao = context.getBean("userDao", UserDao.class);
 
