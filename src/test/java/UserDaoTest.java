@@ -20,9 +20,8 @@ import java.sql.SQLException;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = "/applicationContext.xml")
-@DirtiesContext
+//@RunWith(SpringJUnit4ClassRunner.class)
+//@ContextConfiguration(locations = "/applicationContext.xml")
 public class UserDaoTest {
 
     @Autowired
@@ -38,24 +37,23 @@ public class UserDaoTest {
 
     @Before
     public void setUp(){
-//        ApplicationContext context
-//                = new ClassPathXmlApplicationContext("applicationContext.xml");
+        ApplicationContext context
+                = new ClassPathXmlApplicationContext("applicationContext.xml");
 //        ApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class);
         this.dao = context.getBean("userDao", UserDao.class);
 
-        DataSource dataSource = new SingleConnectionDataSource(
-                "org.mariadb.jdbc.Driver",
-                "jdbc:mariadb://localhost:3306/springbookTestDB",
-                "root",
-                "aidaboat24",
-                true
-        );
-        dao.setDataSource(dataSource);
+//        DataSource dataSource = new SingleConnectionDataSource(
+//                "org.mariadb.jdbc.Driver",
+//                "jdbc:mariadb://localhost:3306/springbookTestDB",
+//                "root",
+//                "aidaboat24",
+//                true
+//        );
+//        dao.setDataSource(dataSource);
 
         this.user1 = new User("1","aa","p123");
         this.user2 = new User("2","bb","p124");
         this.user3 = new User("3","cc","p125");
-
     }
 
     @Test

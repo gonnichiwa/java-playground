@@ -2,13 +2,13 @@ package springbook.user;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.support.GenericXmlApplicationContext;
 import springbook.user.dao.UserDao;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class UserDaoTest {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException {
 
 //        UserDao dao = new UserDao(); // 이래 쓰지 말고
 //        ConnectionMaker connectionMaker = new NConnectionMaker(); // L9, 10과 같이 클라이언트에서 인터페이스 받아 뭐 쓸지 결정
@@ -42,17 +42,17 @@ public class UserDaoTest {
         * 본 경로 libs/ 에 라이브러리들 추가했으니 스프링 애플리케이션 컨텍스트로 쓰면
         * 아래와 같다.
         * */
-//        ApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class);
-        ApplicationContext context = new GenericXmlApplicationContext("applicationContext.xml");
+        ApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class);
+//        ApplicationContext context = new GenericXmlApplicationContext("applicationContext.xml");
         UserDao dao = context.getBean("userDao", UserDao.class);
 
         // add()
-//        User user = new User();
-//        user.setId("111");
-//        user.setName("jjjjjj");
-//        user.setPassword("passwordddd");
-//        dao.add(user);
-//        System.out.println(user.getId() + " 등록 성공!");
+        User user = new User();
+        user.setId("111");
+        user.setName("jjjjjj");
+        user.setPassword("passwordddd");
+        dao.add(user);
+        System.out.println(user.getId() + " 등록 성공!");
 
         // getAll();
         ArrayList<User> users = dao.getAll();
@@ -61,9 +61,9 @@ public class UserDaoTest {
         }
 
         // get(id)
-        User user = dao.get("111");
-        System.out.println(user.getId() + " | "
-                + user.getName() + " | "
-                + user.getPassword());
+        User user2 = dao.get("1");
+        System.out.println(user2.getId() + " | "
+                + user2.getName() + " | "
+                + user2.getPassword());
     }
 }

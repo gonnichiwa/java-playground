@@ -3,7 +3,6 @@ package springbook.user.dao;
 import org.springframework.dao.EmptyResultDataAccessException;
 import springbook.user.ConnectionMaker;
 import springbook.user.User;
-import springbook.user.dao.statement.DeleteAllStatement;
 import springbook.user.dao.statement.StatementStrategy;
 
 import javax.sql.DataSource;
@@ -18,10 +17,16 @@ public class UserDao {
 
     private DataSource dataSource;
 
+    private JdbcContext jdbcContext;
+
     public UserDao(){}
 
     public void setConnectionMaker(ConnectionMaker connectionMaker) {
         this.connectionMaker = connectionMaker;
+    }
+
+    public void setJdbcContext(JdbcContext jdbcContext) {
+        this.jdbcContext = jdbcContext;
     }
 
     public void setDataSource(DataSource dataSource) {
@@ -29,17 +34,19 @@ public class UserDao {
     }
 
     public void add(User user) throws SQLException {
-        // 익명클래스화
-        StatementStrategy st = c -> {
-            PreparedStatement ps = null;
-            String sql = "insert into users values (?,?,?)";
-            ps = c.prepareStatement(sql);
-            ps.setString(1, user.getId());
-            ps.setString(2, user.getName());
-            ps.setString(3, user.getPassword());
-            return ps;
-        };
-        jdbcContextWithStatementStrategy(st);
+        // 걍 인터페이스 받아서 바로 구현
+        this.jdbcContext.workWithStatementStrategy(new StatementStrategy() {
+            @Override
+            public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
+                PreparedStatement ps = null;
+                String sql = "insert into users values (?,?,?)";
+                ps = c.prepareStatement(sql);
+                ps.setString(1, user.getId());
+                ps.setString(2, user.getName());
+                ps.setString(3, user.getPassword());
+                return ps;
+            }
+        });
     }
 
     public User get(String id){
@@ -113,8 +120,7 @@ public class UserDao {
     }
 
     public void deleteAll() throws SQLException {
-        StatementStrategy stmt = new DeleteAllStatement();
-        jdbcContextWithStatementStrategy(stmt);
+        this.jdbcContext.workWithStatementStrategy(c -> c.prepareStatement("delete from users"));
     }
 
     public int getCount(){
@@ -145,24 +151,4 @@ public class UserDao {
         }
     }
 
-    public void jdbcContextWithStatementStrategy(StatementStrategy stmt) throws SQLException {
-        Connection c = null;
-        PreparedStatement ps = null;
-        try {
-            c = dataSource.getConnection();
-            ps = stmt.makePreparedStatement(c);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if(ps != null) {
-                try {
-                    ps.close();
-                    c.close();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-    }
 }

@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import springbook.user.dao.CountingConnectionMaker;
 import springbook.user.dao.DConnectionMaker;
+import springbook.user.dao.JdbcContext;
 import springbook.user.dao.UserDao;
 
 import javax.sql.DataSource;
@@ -19,6 +20,7 @@ public class DaoFactory {
         ConnectionMaker connectionMaker = getConnectionMaker();
         UserDao dao = new UserDao();
         dao.setConnectionMaker(connectionMaker);
+        dao.setJdbcContext(new JdbcContext(dataSource()));
         dao.setDataSource(dataSource());
         return dao;
     }
@@ -32,7 +34,6 @@ public class DaoFactory {
         dataSource.setPassword("aidaboat24");
         return dataSource;
     }
-
 
     private ConnectionMaker getConnectionMaker(){
         return new CountingConnectionMaker(new DConnectionMaker());
