@@ -16,8 +16,10 @@ import springbook.user.dao.UserDao;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
+import java.util.List;
 
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 //@RunWith(SpringJUnit4ClassRunner.class)
@@ -71,15 +73,21 @@ public class UserDaoTest {
 
         dao.add(user1);
         dao.add(user2);
-        assertThat(dao.getCount(), is(2));
+        dao.add(user3);
+        assertThat(dao.getCount(), is(3));
         
         User getuser1 = dao.get(user1.getId());
         assertThat(getuser1.getName(), is(user1.getName()));
         assertThat(getuser1.getPassword(), is(user1.getPassword()));
         
-        User getuser2 = dao.get(user2.getId());
+        User getuser2 = dao.get2(user2.getId());
         assertThat(getuser2.getName(), is(user2.getName()));
         assertThat(getuser2.getPassword(), is(user2.getPassword()));
+        
+        User getuser3 = dao.get2(user3.getId());
+        assertThat(getuser3.getName(), is(user3.getName()));
+        assertThat(getuser3.getPassword(), is(user3.getPassword()));
+        
         
     }
 
@@ -118,5 +126,37 @@ public class UserDaoTest {
         dao.add(user3);
         assertThat(dao.getCount3(), is(3));
         
+    }
+    
+    @Test public void getAll2() throws SQLException {
+        dao.deleteAll();
+
+        List<User> users0 = dao.getAll2();
+        assertThat(users0.size(), is(0));
+        
+        dao.add(user3); // id : 3
+        List<User> users3 = dao.getAll2();
+        assertThat(users3.size(), is(1));
+        checkSameUser(user3, users3.get(0));
+        
+        dao.add(user2); // id : 2
+        List<User> users2 = dao.getAll2();
+        assertThat(users2.size(), is(2));
+        checkSameUser(user2, users2.get(0));
+        checkSameUser(user3, users2.get(1));
+
+
+        dao.add(user1);
+        List<User> users1 = dao.getAll2();
+        assertThat(users1.size(), is(3));
+        checkSameUser(user3, users1.get(2));
+        checkSameUser(user2, users1.get(1));
+        checkSameUser(user1, users1.get(0));
+    }
+
+    private void checkSameUser(User source, User target) {
+        assertEquals(source.getId(), target.getId());
+        assertEquals(source.getName(), target.getName());
+        assertEquals(source.getPassword(), target.getPassword());
     }
 }
