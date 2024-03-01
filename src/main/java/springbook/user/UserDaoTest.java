@@ -2,6 +2,7 @@ package springbook.user;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.support.GenericXmlApplicationContext;
 import springbook.user.dao.UserDao;
 
 import java.sql.SQLException;
@@ -42,8 +43,8 @@ public class UserDaoTest {
         * 본 경로 libs/ 에 라이브러리들 추가했으니 스프링 애플리케이션 컨텍스트로 쓰면
         * 아래와 같다.
         * */
-        ApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class);
-//        ApplicationContext context = new GenericXmlApplicationContext("applicationContext.xml");
+//        ApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class);
+        ApplicationContext context = new GenericXmlApplicationContext("applicationContext.xml");
         UserDao dao = context.getBean("userDao", UserDao.class);
 
         // add()

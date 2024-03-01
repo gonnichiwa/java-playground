@@ -37,11 +37,12 @@ public class UserDaoTest {
 
     @Before
     public void setUp(){
-        ApplicationContext context
-                = new ClassPathXmlApplicationContext("applicationContext.xml");
-//        ApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class);
+//        ApplicationContext context
+//                = new ClassPathXmlApplicationContext("applicationContext.xml");
+        ApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class);
         this.dao = context.getBean("userDao", UserDao.class);
 
+        // 즉석에서 테스트환경 DB 쓰면서 dataSource수정하고 싶으면
 //        DataSource dataSource = new SingleConnectionDataSource(
 //                "org.mariadb.jdbc.Driver",
 //                "jdbc:mariadb://localhost:3306/springbookTestDB",
@@ -109,13 +110,13 @@ public class UserDaoTest {
         assertThat(dao.getCount(), is(0));
 
         dao.add(user1);
-        assertThat(dao.getCount(), is(1));
+        assertThat(dao.getCount2(), is(1));
 
         dao.add(user2);
-        assertThat(dao.getCount(), is(2));
+        assertThat(dao.getCount2(), is(2));
 
         dao.add(user3);
-        assertThat(dao.getCount(), is(3));
+        assertThat(dao.getCount3(), is(3));
         
     }
 }

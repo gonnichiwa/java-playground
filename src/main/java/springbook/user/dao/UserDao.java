@@ -1,6 +1,10 @@
 package springbook.user.dao;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import springbook.user.ConnectionMaker;
 import springbook.user.User;
 import springbook.user.dao.statement.StatementStrategy;
@@ -19,6 +23,8 @@ public class UserDao {
 
     private JdbcContext jdbcContext;
 
+    private JdbcTemplate jdbcTemplate;
+
     public UserDao(){}
 
     public void setConnectionMaker(ConnectionMaker connectionMaker) {
@@ -33,26 +39,26 @@ public class UserDao {
         this.dataSource = dataSource;
     }
 
+    public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
     public void add(User user) throws SQLException {
-        // 걍 인터페이스 받아서 바로 구현
-        this.jdbcContext.workWithStatementStrategy(new StatementStrategy() {
-            @Override
-            public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
-                PreparedStatement ps = null;
-                String sql = "insert into users values (?,?,?)";
-                ps = c.prepareStatement(sql);
-                ps.setString(1, user.getId());
-                ps.setString(2, user.getName());
-                ps.setString(3, user.getPassword());
-                return ps;
-            }
-        });
+        this.jdbcTemplate.update("insert into users values (?,?,?)",
+                user.getId(),
+                user.getName(),
+                user.getPassword());
     }
 
     public void deleteAll() throws SQLException {
-        this.jdbcContext.executeSql("delete from users");
+//        this.jdbcContext.executeSql("delete from users");
+        this.jdbcTemplate.update(new PreparedStatementCreator() {
+            @Override
+            public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+                return connection.prepareStatement("delete from users");
+            }
+        });
     }
-
 
     public User get(String id){
         Connection c = null;
@@ -151,5 +157,16 @@ public class UserDao {
             }
         }
     }
+    public int getCount2(){
+        return this.jdbcTemplate.query(
+                c -> c.prepareStatement("select count(*) as count from users"),
+                rs -> {
+                    rs.next();
+                    return rs.getInt(1);
+                });
+    }
 
+    public int getCount3(){
+        return this.jdbcTemplate.queryForInt("select count(*) as count from users");
+    }
 }
