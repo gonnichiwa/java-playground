@@ -34,12 +34,11 @@ interface BufferedReaderCallback {
     Integer doSomethingWithReader(BufferedReader br) throws IOException;
 }
 interface LineCallback {
-    Integer doSomethingWithLine(String line, Integer value);
+    Integer doSomethingWithLine(String line, int initval);
 }
 class Calculator {
-
-    protected Integer fileLineReadTemplate(BufferedReader br, LineCallback lc) throws IOException {
-        int sum = 0;
+    protected Integer lineReadTemplate(BufferedReader br, LineCallback lc, int initVal) throws IOException {
+        int sum = initVal;
         String line = null;
         while((line = br.readLine()) != null){
             sum = lc.doSomethingWithLine(line, sum);
@@ -69,12 +68,12 @@ class Calculator {
         return this.fileReadTemplate(filePath, new BufferedReaderCallback() {
             @Override
             public Integer doSomethingWithReader(BufferedReader br) throws IOException {
-                int sum1 = 0;
-                String line = null;
-                while((line = br.readLine()) != null){
-                    sum1 += Integer.parseInt(line);
-                }
-                return sum1;
+                return lineReadTemplate(br, new LineCallback() {
+                    @Override
+                    public Integer doSomethingWithLine(String line, int initval) {
+                        return initval + Integer.parseInt(line);
+                    }
+                }, 0);
             }
         });
     }
@@ -83,12 +82,12 @@ class Calculator {
         return this.fileReadTemplate(filePath, new BufferedReaderCallback() {
             @Override
             public Integer doSomethingWithReader(BufferedReader br) throws IOException {
-                int multiply = 1;
-                String line = null;
-                while((line = br.readLine()) != null){
-                    multiply *= Integer.parseInt(line);
-                }
-                return multiply;
+                return lineReadTemplate(br, new LineCallback() {
+                    @Override
+                    public Integer doSomethingWithLine(String line, int initval) {
+                        return initval * Integer.parseInt(line);
+                    }
+                }, 1);
             }
         });
     }
