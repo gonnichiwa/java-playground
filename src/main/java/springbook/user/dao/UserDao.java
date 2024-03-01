@@ -49,6 +49,11 @@ public class UserDao {
         });
     }
 
+    public void deleteAll() throws SQLException {
+        this.jdbcContext.executeSql("delete from users");
+    }
+
+
     public User get(String id){
         Connection c = null;
         PreparedStatement ps = null;
@@ -117,10 +122,6 @@ public class UserDao {
                 }
             }
         }
-    }
-
-    public void deleteAll() throws SQLException {
-        this.jdbcContext.workWithStatementStrategy(c -> c.prepareStatement("delete from users"));
     }
 
     public int getCount(){
