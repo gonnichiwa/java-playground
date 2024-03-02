@@ -1,11 +1,16 @@
 package springbook.user.dao;
 
+import org.mariadb.jdbc.internal.util.exceptions.MariaDbSqlException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import springbook.user.ConnectionMaker;
 import springbook.user.User;
+import springbook.user.exception.ApplicationRuntimeException;
+import springbook.user.exception.DuplicateUserIdException;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -23,6 +28,17 @@ public class UserDao {
     private JdbcContext jdbcContext;
 
     private JdbcTemplate jdbcTemplate;
+
+    private final RowMapper<User> userMapper = new RowMapper<User>() {
+        @Override
+        public User mapRow(ResultSet rs, int rowNum) throws SQLException {
+            User user = new User();
+            user.setId(rs.getString("id"));
+            user.setName(rs.getString("name"));
+            user.setPassword(rs.getString("password"));
+            return user;
+        }
+    };
 
     public UserDao(){}
 
@@ -42,14 +58,24 @@ public class UserDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public void add(User user) throws SQLException {
-        this.jdbcTemplate.update("insert into users values (?,?,?)",
-                user.getId(),
-                user.getName(),
-                user.getPassword());
+    public void add(User user) throws DuplicateUserIdException {
+        try {
+            this.jdbcTemplate.update("insert into users values (?,?,?)",
+                    user.getId(),
+                    user.getName(),
+                    user.getPassword());
+        }
+        catch (Exception e) {
+            if(e instanceof DataIntegrityViolationException) {
+                if (e.getMessage().contains("PRIMARY"))
+                    throw new DuplicateUserIdException(e);
+            } else {
+                throw new ApplicationRuntimeException(e);
+            }
+        }
     }
 
-    public void deleteAll() throws SQLException {
+    public void deleteAll() {
 //        this.jdbcContext.executeSql("delete from users");
         this.jdbcTemplate.update(new PreparedStatementCreator() {
             @Override
@@ -99,14 +125,25 @@ public class UserDao {
     public User get2(String id) {
         return this.jdbcTemplate.queryForObject("select * from users where id = ?",
                 new Object[]{ id },
-                (rs, i) -> {
-                    User user = new User();
-                    user.setId(rs.getString("id"));
-                    user.setName(rs.getString("name"));
-                    user.setPassword(rs.getString("password"));
-                    return user;
+                this.userMapper);
+    }
+    public List<User> getAll2() {
+        return this.jdbcTemplate.query("select * from users order by id asc", this.userMapper);
+    }
+
+    public int getCount2(){
+        return this.jdbcTemplate.query(
+                c -> c.prepareStatement("select count(*) as count from users"),
+                rs -> {
+                    rs.next();
+                    return rs.getInt(1);
                 });
     }
+
+    public int getCount3(){
+        return this.jdbcTemplate.queryForInt("select count(*) as count from users");
+    }
+
 
     public ArrayList<User> getAll(){
         Connection c = null;
@@ -141,18 +178,6 @@ public class UserDao {
         }
     }
 
-    public List<User> getAll2() {
-        return this.jdbcTemplate.query("select * from users order by id asc", new RowMapper<User>() {
-            @Override
-            public User mapRow(ResultSet rs, int rowNum) throws SQLException {
-                User user = new User();
-                user.setId(rs.getString("id"));
-                user.setName(rs.getString("name"));
-                user.setPassword(rs.getString("password"));
-                return user;
-            }
-        });
-    }
     public int getCount(){
         Connection c = null;
         PreparedStatement ps = null;
@@ -179,17 +204,5 @@ public class UserDao {
                 }
             }
         }
-    }
-    public int getCount2(){
-        return this.jdbcTemplate.query(
-                c -> c.prepareStatement("select count(*) as count from users"),
-                rs -> {
-                    rs.next();
-                    return rs.getInt(1);
-                });
-    }
-
-    public int getCount3(){
-        return this.jdbcTemplate.queryForInt("select count(*) as count from users");
     }
 }

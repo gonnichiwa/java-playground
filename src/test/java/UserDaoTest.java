@@ -13,6 +13,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import springbook.user.DaoFactory;
 import springbook.user.User;
 import springbook.user.dao.UserDao;
+import springbook.user.exception.DuplicateUserIdException;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -87,8 +88,14 @@ public class UserDaoTest {
         User getuser3 = dao.get2(user3.getId());
         assertThat(getuser3.getName(), is(user3.getName()));
         assertThat(getuser3.getPassword(), is(user3.getPassword()));
-        
-        
+    }
+
+    @Test(expected = DuplicateUserIdException.class)
+    public void getUserIdDuplicateFailure() throws DuplicateUserIdException, SQLException {
+        dao.deleteAll();
+
+        dao.add(user1);
+        dao.add(user1);
     }
 
     @Test(expected = EmptyResultDataAccessException.class)

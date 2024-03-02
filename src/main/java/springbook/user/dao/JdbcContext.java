@@ -22,7 +22,7 @@ public class JdbcContext {
         this.dataSource = dataSource;
     }
 
-    public void workWithStatementStrategy(StatementStrategy stmt) throws SQLException{
+    public void workWithStatementStrategy(StatementStrategy stmt) {
         Connection c = null;
         PreparedStatement ps = null;
         try {
@@ -43,7 +43,7 @@ public class JdbcContext {
         }
     }
 
-    public void executeSql(final String sql) throws SQLException {
+    public void executeSql(final String sql) {
         this.workWithStatementStrategy(c -> c.prepareStatement(sql));
     }
 }
