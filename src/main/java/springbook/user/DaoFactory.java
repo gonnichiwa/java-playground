@@ -4,10 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
-import springbook.user.dao.CountingConnectionMaker;
-import springbook.user.dao.DConnectionMaker;
-import springbook.user.dao.JdbcContext;
-import springbook.user.dao.UserDao;
+import springbook.user.dao.*;
 
 import javax.sql.DataSource;
 
@@ -26,6 +23,18 @@ public class DaoFactory {
         dao.setJdbcTemplate(new JdbcTemplate(dataSource()));
         return dao;
     }
+
+    // 4장에서 bean class 변경할 경우
+//    @Bean
+//    public IUserDao userDao(){
+//        ConnectionMaker connectionMaker = getConnectionMaker();
+//        IUserDaoJdbc dao = new IUserDaoJdbc();
+//        dao.setConnectionMaker(connectionMaker);
+//        dao.setJdbcContext(new JdbcContext(dataSource()));
+//        dao.setDataSource(dataSource());
+//        dao.setJdbcTemplate(new JdbcTemplate(dataSource()));
+//        return dao;
+//    }
 
     @Bean
     public DataSource dataSource(){

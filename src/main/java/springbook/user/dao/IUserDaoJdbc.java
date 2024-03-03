@@ -1,8 +1,6 @@
 package springbook.user.dao;
 
-import org.mariadb.jdbc.internal.util.exceptions.MariaDbSqlException;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -20,15 +18,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserDao {
+public class IUserDaoJdbc implements IUserDao{
     private ConnectionMaker connectionMaker;
-
     private DataSource dataSource;
-
     private JdbcContext jdbcContext;
-
     private JdbcTemplate jdbcTemplate;
-
     private final RowMapper<User> userMapper = new RowMapper<User>() {
         @Override
         public User mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -40,20 +34,20 @@ public class UserDao {
         }
     };
 
-    public UserDao(){}
+    public IUserDaoJdbc() {}
+    public IUserDaoJdbc(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
 
     public void setConnectionMaker(ConnectionMaker connectionMaker) {
         this.connectionMaker = connectionMaker;
     }
-
-    public void setJdbcContext(JdbcContext jdbcContext) {
-        this.jdbcContext = jdbcContext;
-    }
-
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
     }
-
+    public void setJdbcContext(JdbcContext jdbcContext) {
+        this.jdbcContext = jdbcContext;
+    }
     public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
