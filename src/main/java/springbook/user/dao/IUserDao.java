@@ -14,4 +14,5 @@ public interface IUserDao {
     int getCount();
     int getCount2();
     int getCount3();
+    void update(User user);
 }

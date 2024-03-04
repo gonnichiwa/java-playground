@@ -11,6 +11,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import springbook.user.DaoFactory;
+import springbook.user.Level;
 import springbook.user.User;
 import springbook.user.dao.IUserDao;
 import springbook.user.dao.IUserDaoJdbc;
@@ -51,7 +52,6 @@ public class UserDaoTest {
 //        ApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class); // DaoFactory.userDao() 생성자로 IUserDao 리턴하는걸로 바꿔줘야함.
         this.dao = context.getBean("userDao", IUserDao.class);
 
-
         // 즉석에서 테스트환경 DB 쓰면서 dataSource수정하고 싶으면
 //        DataSource dataSource = new SingleConnectionDataSource(
 //                "org.mariadb.jdbc.Driver",
@@ -62,9 +62,9 @@ public class UserDaoTest {
 //        );
 //        dao.setDataSource(dataSource);
 
-        this.user1 = new User("1","aa","p123");
-        this.user2 = new User("2","bb","p124");
-        this.user3 = new User("3","cc","p125");
+        this.user1 = new User("1","aa","p123", Level.BASIC, 1, 0);
+        this.user2 = new User("2","bb","p124", Level.SILVER, 55, 10);
+        this.user3 = new User("3","cc","p125", Level.GOLD, 100, 40);
     }
 
     @Test
@@ -172,5 +172,32 @@ public class UserDaoTest {
         assertEquals(source.getId(), target.getId());
         assertEquals(source.getName(), target.getName());
         assertEquals(source.getPassword(), target.getPassword());
+        assertEquals(source.getLevel(), target.getLevel());
+        assertEquals(source.getLogin(), target.getLogin());
+        assertEquals(source.getRecommend(), target.getRecommend());
+    }
+
+    @Test public void update() {
+        dao.deleteAll();
+
+        dao.add(user1);
+        // dao.update() 쿼리에 where 빼먹고 id setter 안집어넣으면 성공 뜰것이므로 테스트 보강한다.
+        dao.add(user2);
+
+        user1.setName("upname");
+        user1.setPassword("spring6");
+        user1.setLevel(Level.GOLD);
+        user1.setLogin(1000);
+        user1.setRecommend(999);
+        dao.update(user1);
+
+        User user1update = dao.get2(user1.getId());
+        checkSameUser(user1, user1update);
+        User user2update = dao.get2(user2.getId());
+
+        // dao.update() 쿼리에 where 빼먹고 id setter 안집어넣으면 성공 뜰것이므로 테스트 보강한다.
+        checkSameUser(user2, user2update);
+
+
     }
 }
