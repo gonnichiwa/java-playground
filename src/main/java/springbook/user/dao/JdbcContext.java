@@ -44,6 +44,11 @@ public class JdbcContext {
     }
 
     public void executeSql(final String sql) {
-        this.workWithStatementStrategy(c -> c.prepareStatement(sql));
+        this.workWithStatementStrategy(new StatementStrategy() {
+            @Override
+            public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
+                return c.prepareStatement(sql);
+            }
+        });
     }
 }

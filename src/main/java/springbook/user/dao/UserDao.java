@@ -1,11 +1,13 @@
 package springbook.user.dao;
 
 import org.mariadb.jdbc.internal.util.exceptions.MariaDbSqlException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import springbook.user.ConnectionMaker;
 import springbook.user.User;
@@ -128,12 +130,24 @@ public class UserDao {
         return this.jdbcTemplate.query("select * from users order by id asc", this.userMapper);
     }
     public int getCount2(){
-        return this.jdbcTemplate.query(
-                c -> c.prepareStatement("select count(*) as count from users"),
-                rs -> {
-                    rs.next();
-                    return rs.getInt(1);
-                });
+//        return this.jdbcTemplate.query(
+//                c -> c.prepareStatement("select count(*) as count from users"),
+//                rs -> {
+//                    rs.next();
+//                    return rs.getInt(1);
+//                });
+        return this.jdbcTemplate.query(new PreparedStatementCreator() {
+            @Override
+            public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+                return connection.prepareStatement("select count(*) as count from users");
+            }
+        }, new ResultSetExtractor<Integer>() {
+            @Override
+            public Integer extractData(ResultSet rs) throws SQLException, DataAccessException {
+                rs.next();
+                return rs.getInt(1);
+            }
+        });
     }
     public int getCount3(){
         return this.jdbcTemplate.queryForInt("select count(*) as count from users");
