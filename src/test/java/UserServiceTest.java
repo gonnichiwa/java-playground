@@ -11,8 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 import static springbook.user.service.UserService.MIN_LOGCOUNT_FOR_SILVER;
 import static springbook.user.service.UserService.MIN_RECOMMAND_FOR_GOLD;
 
@@ -93,6 +92,24 @@ public class UserServiceTest {
 
         assertThat(userWithLevelRead.getLevel(), is(userWithLevelRead.getLevel()));
         assertThat(userWITHOUTLevelRead.getLevel(), is(userWITHOUTLevelRead.getLevel()));
+    }
+
+    @Test public void upgradeAllOrNothing(){
+        UserService testUserService = new TestUserService(users.get(3).getId());
+        testUserService.setUserDao(this.userDao);
+
+        userDao.deleteAll();
+        for(User user: users) userDao.add(user);
+
+        try {
+            testUserService.upgradeNextLevelAllUsers();
+            // 위 upgradeNextLevelAllUsers() 정상 종료 되면 본 테스트케이스 이상있으므로 실패처리
+            fail("TestUserServiceException excepted, but exit 0");
+        } catch (TestUserServiceException e){
+
+        }
+
+        checkLevelUpgrade(users.get(1), false);
     }
 
 

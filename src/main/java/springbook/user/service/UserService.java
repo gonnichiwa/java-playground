@@ -27,7 +27,7 @@ public class UserService {
         }
     }
 
-    private void upgradeNextLevel(User user) {
+    protected void upgradeNextLevel(User user) {
         user.upgradeNextLevel(); // 서비스가 다음레벨 뭔지까지 설정해줄려니 책임이 무겁다..
         userDao.update(user);
     }
