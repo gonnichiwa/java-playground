@@ -36,4 +36,8 @@ http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
         <property name="jdbcTemplate" ref="myJdbcTemplate"/>
     </bean>
 
+    <bean id="userService" class="springbook.user.service.UserService">
+        <property name="userDao" ref="userDao"/>
+    </bean>
+
 </beans>

@@ -1,44 +1,39 @@
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.datasource.SingleConnectionDataSource;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import springbook.user.DaoFactory;
 import springbook.user.Level;
 import springbook.user.User;
 import springbook.user.dao.IUserDao;
-import springbook.user.dao.IUserDaoJdbc;
 import springbook.user.dao.UserDao;
 import springbook.user.exception.DuplicateUserIdException;
+import springbook.user.service.UserService;
 
-import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.List;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 //@RunWith(SpringJUnit4ClassRunner.class)
-//@ContextConfiguration(locations = "/applicationContext.xml")
+//@ContextConfiguration(locations = "applicationContext.xml")
 public class UserDaoTest {
 
-    @Autowired
-    private ApplicationContext context;
-
+//    @Autowired
+//    private ApplicationContext context;
     @Autowired
     private UserDao exDao;
 
     // 4장의 IUserDaoJdbc로 변경
     @Autowired
     private IUserDao dao;
+
+    @Autowired
+    private UserService userService;
 
     // fixture : 테스트에 필요한 정보나 오브젝트
     private User user1;
@@ -51,6 +46,7 @@ public class UserDaoTest {
                 = new ClassPathXmlApplicationContext("applicationContext.xml");
 //        ApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class); // DaoFactory.userDao() 생성자로 IUserDao 리턴하는걸로 바꿔줘야함.
         this.dao = context.getBean("userDao", IUserDao.class);
+        this.userService = context.getBean("userService", UserService.class);
 
         // 즉석에서 테스트환경 DB 쓰면서 dataSource수정하고 싶으면
 //        DataSource dataSource = new SingleConnectionDataSource(
@@ -67,10 +63,14 @@ public class UserDaoTest {
         this.user3 = new User("3","cc","p125", Level.GOLD, 100, 40);
     }
 
+    @Test public void serviceBeanLoaded() {
+        assertThat(this.userService, is(notNullValue()));
+    }
+
     @Test
     public void addAndGet() throws SQLException {
-//        ApplicationContext context
-//                = new ClassPathXmlApplicationContext("applicationContext.xml");
+        ApplicationContext context
+                = new ClassPathXmlApplicationContext("applicationContext.xml");
 //        UserDao dao = context.getBean("userDao", UserDao.class);
 
         dao.deleteAll();
@@ -108,7 +108,7 @@ public class UserDaoTest {
     @Test(expected = EmptyResultDataAccessException.class)
     public void getUserFailure() throws SQLException {
 //        ApplicationContext context
-//                = new ClassPathXmlApplicationContext("applicationContext.xml");
+//                = new ClassPathXmlApplicationContext("test-applicationContext.xml");
 //        UserDao dao = context.getBean("userDao", UserDao.class);
 
         dao.deleteAll();
@@ -121,7 +121,7 @@ public class UserDaoTest {
     @Test
     public void count() throws SQLException {
 //        ApplicationContext context
-//                = new ClassPathXmlApplicationContext("applicationContext.xml");
+//                = new ClassPathXmlApplicationContext("test-applicationContext.xml");
 //        UserDao dao = context.getBean("userDao", UserDao.class);
 
 //        User user1 = new User("1","aa","p123");

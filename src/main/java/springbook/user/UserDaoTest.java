@@ -66,5 +66,7 @@ public class UserDaoTest {
         System.out.println(user2.getId() + " | "
                 + user2.getName() + " | "
                 + user2.getPassword());
+
+
     }
 }
