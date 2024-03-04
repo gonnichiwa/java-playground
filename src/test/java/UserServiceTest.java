@@ -7,7 +7,6 @@ import springbook.user.User;
 import springbook.user.dao.IUserDao;
 import springbook.user.service.UserService;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -38,23 +37,38 @@ public class UserServiceTest {
         );
     }
 
-    @Test public void upgradeLevels(){
+    @Test public void upgradeNextLevelAllUsers(){
         userDao.deleteAll();
         for(User user : users) userDao.add(user);
 
-        userService.upgradeLevels();
+        userService.upgradeNextLevelAllUsers();
 
-        users = userDao.getAll2();
-
-        checkLevel(users.get(0), Level.BASIC);
-        checkLevel(users.get(1), Level.SILVER);
-        checkLevel(users.get(2), Level.SILVER);
-        checkLevel(users.get(3), Level.GOLD);
-        checkLevel(users.get(4), Level.GOLD);
+        checkLevelUpgrade(users.get(0), false);
+        checkLevelUpgrade(users.get(1), true);
+        checkLevelUpgrade(users.get(2), false);
+        checkLevelUpgrade(users.get(3), true);
+        checkLevelUpgrade(users.get(4), false);
     }
 
-    private void checkLevel(User user, Level level) {
-        assertEquals(user.getLevel(), level);
+    @Test(expected = IllegalArgumentException.class)
+    public void cannotUpgradeLevel(){
+        Level[] levels = Level.values();
+        User user = users.get(0);
+
+        for(Level level: levels){
+            if(level.nextLevel() != null) continue;
+            user.setLevel(level);
+            user.upgradeNextLevel();
+        }
+    }
+    private void checkLevelUpgrade(User user, boolean upgraded) {
+        User updatedUser = userDao.get2(user.getId());
+        if(upgraded){
+            assertThat(updatedUser.getLevel(), is(user.getLevel().nextLevel()));
+        } else {
+            assertThat(updatedUser.getLevel(), is(user.getLevel()));
+        }
+
     }
 
     // 신규 가입 사용자의 레벨은 BASIC으로 한다면?
@@ -65,7 +79,7 @@ public class UserServiceTest {
         // given
         User userWithLevel = users.get(4); // GOLD 레벨인 유저, 등록 후에도 GOLD 유지되는지 확인
         User userWITHOUTLevel = users.get(0); // newbie
-        userWITHOUTLevel.setLevel(null); // 등록중 BASIC이 설정되어야 함.
+             userWITHOUTLevel.setLevel(null); // 등록중 BASIC이 설정되어야 하니까 Level null 처리.
 
         // when
         userService.add(userWithLevel);
@@ -77,7 +91,6 @@ public class UserServiceTest {
 
         assertThat(userWithLevelRead.getLevel(), is(userWithLevelRead.getLevel()));
         assertThat(userWITHOUTLevelRead.getLevel(), is(userWITHOUTLevelRead.getLevel()));
-
     }
 
 

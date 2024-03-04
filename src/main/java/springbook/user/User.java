@@ -57,7 +57,7 @@ public class User {
         this.recommend = recommend;
     }
 
-    public void upgradeLevel() {
+    public void upgradeNextLevel() { // 유저의 다음레벨을 정함.
         Level nextLevel = this.level.nextLevel();
         if(nextLevel == null){
             throw new IllegalArgumentException(this.level + " can't upgrade level.");
