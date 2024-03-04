@@ -13,6 +13,8 @@ import java.util.List;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static springbook.user.service.UserService.MIN_LOGCOUNT_FOR_SILVER;
+import static springbook.user.service.UserService.MIN_RECOMMAND_FOR_GOLD;
 
 public class UserServiceTest {
     List<User> users;
@@ -29,11 +31,11 @@ public class UserServiceTest {
         this.userService = context.getBean("userService", UserService.class);
 
         this.users = Arrays.asList(
-                new User("1","n1","p1", Level.BASIC,49,0),
-                new User("2","n2","p2", Level.BASIC,50,0),
-                new User("3","n3","p3", Level.SILVER,60,29),
-                new User("4","n4","p4", Level.SILVER,60,30),
-                new User("5","n5","p5", Level.GOLD,100,100)
+                new User("1","n1","p1", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER-1, 0),
+                new User("2","n2","p2", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER, 0),
+                new User("3","n3","p3", Level.SILVER, 60, MIN_RECOMMAND_FOR_GOLD-1),
+                new User("4","n4","p4", Level.SILVER, 60, MIN_RECOMMAND_FOR_GOLD),
+                new User("5","n5","p5", Level.GOLD, 100, 100)
         );
     }
 

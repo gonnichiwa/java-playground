@@ -7,6 +7,9 @@ import springbook.user.dao.IUserDao;
 import java.util.List;
 
 public class UserService {
+    public static final int MIN_LOGCOUNT_FOR_SILVER = 50;
+    public static final int MIN_RECOMMAND_FOR_GOLD = 30;
+
     IUserDao userDao;
     public void setUserDao(IUserDao userDao) {
         this.userDao = userDao;
@@ -32,8 +35,8 @@ public class UserService {
     private boolean canUpgradeNextLevel(User user) {
         Level currentLev = user.getLevel();
         switch (currentLev){
-            case BASIC: return (user.getLogin() >= 50);
-            case SILVER: return (user.getRecommend() >= 30);
+            case BASIC: return (user.getLogin() >= MIN_LOGCOUNT_FOR_SILVER);
+            case SILVER: return (user.getRecommend() >= MIN_RECOMMAND_FOR_GOLD);
             case GOLD : return false;
             default: throw new IllegalArgumentException("Unknown Level: " + currentLev);
         }
