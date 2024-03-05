@@ -25,6 +25,10 @@ http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
         <property name="dataSource" ref="myDataSource"/>
     </bean>
 
+    <bean id="myMailSender" class="springbook.user.service.DummyMailSender">
+        <property name="host" value="mail.server.com"/>
+    </bean>
+
     <!-- 4장에서 UserDaoJdbc로 변경 -->
     <bean id="userDao" class="springbook.user.dao.IUserDaoJdbc">
         <property name="connectionMaker" ref="myConnectionMaker"/>
@@ -36,6 +40,7 @@ http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
     <bean id="userService" class="springbook.user.service.UserService">
         <property name="userDao" ref="userDao"/>
         <property name="transactionManager" ref="myPlatformTransactionManager"/>
+        <property name="mailSender" ref="myMailSender"/>
     </bean>
 
 </beans>

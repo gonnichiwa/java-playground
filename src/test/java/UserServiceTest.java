@@ -5,10 +5,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
+import org.springframework.mail.MailSender;
 import org.springframework.transaction.PlatformTransactionManager;
 import springbook.user.Level;
 import springbook.user.User;
 import springbook.user.dao.IUserDao;
+import springbook.user.service.DummyMailSender;
 import springbook.user.service.UserService;
 
 import javax.sql.DataSource;
@@ -22,12 +24,10 @@ import static springbook.user.service.UserService.MIN_RECOMMAND_FOR_GOLD;
 
 public class UserServiceTest {
     List<User> users;
-
     IUserDao userDao;
-
     UserService userService;
-
     PlatformTransactionManager transactionManager; // case upgradeAllOrNothing()에서 트랜잭션 실패 확인용
+    MailSender mailSender;
 
     @Before public void SetUp() {
         ApplicationContext context
@@ -36,6 +36,7 @@ public class UserServiceTest {
         this.userDao = context.getBean("userDao", IUserDao.class);
         this.userService = context.getBean("userService", UserService.class);
         this.transactionManager = context.getBean("myPlatformTransactionManager", DataSourceTransactionManager.class);
+        this.mailSender = context.getBean("myMailSender", DummyMailSender.class);
 
 
         this.users = Arrays.asList(
@@ -108,6 +109,7 @@ public class UserServiceTest {
         // TestUserService는 applicationContext에 추가 안한 bean이므로 userDao와 dataSource를 bean DI 해줌.
         testUserService.setUserDao(this.userDao);
         testUserService.setTransactionManager(this.transactionManager);
+        testUserService.setMailSender(this.mailSender);
 
         userDao.deleteAll();
         for(User user: users) userDao.add(user);
