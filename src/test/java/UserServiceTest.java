@@ -3,7 +3,9 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
+import org.springframework.transaction.PlatformTransactionManager;
 import springbook.user.Level;
 import springbook.user.User;
 import springbook.user.dao.IUserDao;
@@ -25,7 +27,7 @@ public class UserServiceTest {
 
     UserService userService;
 
-    DataSource dataSource; // case upgradeAllOrNothing()에서 트랜잭션 실패 확인용
+    PlatformTransactionManager transactionManager; // case upgradeAllOrNothing()에서 트랜잭션 실패 확인용
 
     @Before public void SetUp() {
         ApplicationContext context
@@ -33,7 +35,7 @@ public class UserServiceTest {
 //        ApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class); // DaoFactory.userDao() 생성자로 IUserDao 리턴하는걸로 바꿔줘야함.
         this.userDao = context.getBean("userDao", IUserDao.class);
         this.userService = context.getBean("userService", UserService.class);
-        this.dataSource = context.getBean("myDataSource", SimpleDriverDataSource.class);
+        this.transactionManager = context.getBean("myPlatformTransactionManager", DataSourceTransactionManager.class);
 
 
         this.users = Arrays.asList(
@@ -105,7 +107,7 @@ public class UserServiceTest {
         UserService testUserService = new TestUserService(users.get(3).getId());
         // TestUserService는 applicationContext에 추가 안한 bean이므로 userDao와 dataSource를 bean DI 해줌.
         testUserService.setUserDao(this.userDao);
-        testUserService.setDataSource(this.dataSource);
+        testUserService.setTransactionManager(this.transactionManager);
 
         userDao.deleteAll();
         for(User user: users) userDao.add(user);

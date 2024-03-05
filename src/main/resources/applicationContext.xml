@@ -21,12 +21,9 @@ http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
         <property name="dataSource" ref="myDataSource"/>
     </bean>
 
-<!--    <bean id="userDao" class="springbook.user.dao.UserDao">-->
-<!--        <property name="connectionMaker" ref="myConnectionMaker"/>-->
-<!--        <property name="jdbcContext" ref="myJdbcContext"/>-->
-<!--        <property name="dataSource" ref="myDataSource"/>-->
-<!--        <property name="jdbcTemplate" ref="myJdbcTemplate"/>-->
-<!--    </bean>-->
+    <bean id="myPlatformTransactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="myDataSource"/>
+    </bean>
 
     <!-- 4장에서 UserDaoJdbc로 변경 -->
     <bean id="userDao" class="springbook.user.dao.IUserDaoJdbc">
@@ -38,7 +35,7 @@ http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
     <bean id="userService" class="springbook.user.service.UserService">
         <property name="userDao" ref="userDao"/>
-        <property name="dataSource" ref="myDataSource"/>
+        <property name="transactionManager" ref="myPlatformTransactionManager"/>
     </bean>
 
 </beans>
