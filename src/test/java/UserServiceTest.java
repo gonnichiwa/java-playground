@@ -6,6 +6,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.mail.MailSender;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.PlatformTransactionManager;
 import springbook.user.Level;
 import springbook.user.User;
@@ -19,8 +20,8 @@ import java.util.List;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
-import static springbook.user.service.UserService.MIN_LOGCOUNT_FOR_SILVER;
-import static springbook.user.service.UserService.MIN_RECOMMAND_FOR_GOLD;
+import static springbook.user.service.UserServiceImpl.MIN_LOGCOUNT_FOR_SILVER;
+import static springbook.user.service.UserServiceImpl.MIN_RECOMMAND_FOR_GOLD;
 
 public class UserServiceTest {
     List<User> users;
@@ -104,8 +105,9 @@ public class UserServiceTest {
         assertThat(userWITHOUTLevelRead.getLevel(), is(userWITHOUTLevelRead.getLevel()));
     }
 
-    @Test public void upgradeAllOrNothing(){
-        UserService testUserService = new TestUserService(users.get(3).getId());
+    @Test
+    public void upgradeAllOrNothing(){
+        TestUserService testUserService = new TestUserService(users.get(3).getId());
         // TestUserService는 applicationContext에 추가 안한 bean이므로 userDao와 dataSource를 bean DI 해줌.
         testUserService.setUserDao(this.userDao);
         testUserService.setTransactionManager(this.transactionManager);
