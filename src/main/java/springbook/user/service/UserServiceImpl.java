@@ -29,14 +29,9 @@ public class UserServiceImpl implements UserService {
     public static final int MIN_RECOMMAND_FOR_GOLD = 30;
 
     private IUserDao userDao;
-    private PlatformTransactionManager transactionManager;
     private MailSender mailSender;
-
     public void setUserDao(IUserDao userDao) {
         this.userDao = userDao;
-    }
-    public void setTransactionManager(PlatformTransactionManager transactionManager) {
-        this.transactionManager = transactionManager;
     }
     public void setMailSender(MailSender mailSender) {
         this.mailSender = mailSender;
@@ -46,16 +41,8 @@ public class UserServiceImpl implements UserService {
     // SILVER 레벨 && 30번 추천이면 SILVER -> GOLD
     // 레벨 변경은 일정한 주기로 수행. 변경작업전에는 조건 충족하더라도 레벨 변경 없음.
     @Override
-    public void upgradeNextLevelAllUsers(){
-        TransactionStatus status
-                = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
-        try {
-            upgradeNextLevelsInternal();
-            this.transactionManager.commit(status);
-        } catch (RuntimeException e){
-            this.transactionManager.rollback(status);
-            throw e;
-        }
+    public void upgradeNextLevelAllUsers() {
+        upgradeNextLevelsInternal();
     }
 
     private void upgradeNextLevelsInternal() {

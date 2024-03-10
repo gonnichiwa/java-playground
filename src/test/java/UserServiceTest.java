@@ -13,6 +13,8 @@ import springbook.user.User;
 import springbook.user.dao.IUserDao;
 import springbook.user.service.DummyMailSender;
 import springbook.user.service.UserService;
+import springbook.user.service.UserServiceImpl;
+import springbook.user.service.UserServiceTx;
 
 import javax.sql.DataSource;
 import java.util.Arrays;
@@ -27,6 +29,7 @@ public class UserServiceTest {
     List<User> users;
     IUserDao userDao;
     UserService userService;
+    UserServiceImpl userServiceImpl;
     PlatformTransactionManager transactionManager; // case upgradeAllOrNothing()에서 트랜잭션 실패 확인용
     MailSender mailSender;
 
@@ -110,14 +113,18 @@ public class UserServiceTest {
         TestUserService testUserService = new TestUserService(users.get(3).getId());
         // TestUserService는 applicationContext에 추가 안한 bean이므로 userDao와 dataSource를 bean DI 해줌.
         testUserService.setUserDao(this.userDao);
-        testUserService.setTransactionManager(this.transactionManager);
+//        testUserService.setTransactionManager(this.transactionManager);
         testUserService.setMailSender(this.mailSender);
+
+        UserServiceTx txUserService = new UserServiceTx();
+        txUserService.setTransactionManager(this.transactionManager);
+        txUserService.setUserService(testUserService);
 
         userDao.deleteAll();
         for(User user: users) userDao.add(user);
 
         try {
-            testUserService.upgradeNextLevelAllUsers();
+            txUserService.upgradeNextLevelAllUsers();
             // 위 upgradeNextLevelAllUsers() 정상 종료 되면 본 테스트케이스 이상있으므로 실패처리
             fail("TestUserServiceException excepted, but exit 0");
         } catch (TestUserServiceException e){
