@@ -23,6 +23,34 @@ public class ReflectionTest {
         Method charAtMethod = String.class.getMethod("charAt", int.class);
         assertThat(charAtMethod.invoke(name,0), is('S'));
     }
+
+    @Test
+    public void simpleProxy() {
+        Hello hello = new HelloTarget();
+        assertThat(hello.sayHello("jj"), is("Hello jj"));
+        assertThat(hello.sayHi("jj"), is("Hi jj"));
+        assertThat(hello.sayThankyou("jj"), is("Thank you jj"));
+    }
 }
 
+interface Hello {
+    String sayHello(String name);
+    String sayHi(String name);
+    String sayThankyou(String name);
+}
+class HelloTarget implements Hello {
+    @Override
+    public String sayHello(String name) {
+        return "Hello " + name;
+    }
 
+    @Override
+    public String sayHi(String name) {
+        return "Hi " + name;
+    }
+
+    @Override
+    public String sayThankyou(String name) {
+        return "Thank you " + name;
+    }
+}
