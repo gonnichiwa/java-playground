@@ -6,7 +6,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 // 테스트용 DummyMailSender
-public class DummyMailSender extends JavaMailSenderImpl implements MailSender {
+public class MockMailSender extends JavaMailSenderImpl implements MailSender {
     @Override
     public void send(SimpleMailMessage simpleMailMessage) throws MailException {
         System.out.println("mail sended(mockup)");

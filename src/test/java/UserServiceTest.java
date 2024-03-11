@@ -1,22 +1,18 @@
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.mail.MailSender;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.PlatformTransactionManager;
 import springbook.user.Level;
 import springbook.user.User;
 import springbook.user.dao.IUserDao;
-import springbook.user.service.DummyMailSender;
+import springbook.user.service.MockMailSender;
 import springbook.user.service.UserService;
 import springbook.user.service.UserServiceImpl;
 import springbook.user.service.UserServiceTx;
 
-import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.List;
 
@@ -40,7 +36,7 @@ public class UserServiceTest {
         this.userDao = context.getBean("userDao", IUserDao.class);
         this.userService = context.getBean("userService", UserService.class);
         this.transactionManager = context.getBean("myPlatformTransactionManager", DataSourceTransactionManager.class);
-        this.mailSender = context.getBean("myMailSender", DummyMailSender.class);
+        this.mailSender = context.getBean("myMailSender", MockMailSender.class);
 
 
         this.users = Arrays.asList(
