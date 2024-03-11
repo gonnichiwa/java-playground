@@ -33,12 +33,14 @@ public class ReflectionTest {
         assertThat(hello.sayHello("jj"), is("Hello jj"));
         assertThat(hello.sayHi("jj"), is("Hi jj"));
         assertThat(hello.sayThankyou("jj"), is("Thank you jj"));
+        assertThat(hello.hoho("jj"), is("jj"));
 
         // 데코레이터 패턴 적용(부가기능 객체HelloUppercase) 적용
         Hello helloDeco = new HelloUpperCase(new HelloTarget());
         assertThat(helloDeco.sayHello("jj"), is("HELLO JJ"));
         assertThat(helloDeco.sayHi("jj"), is("HI JJ"));
         assertThat(helloDeco.sayThankyou("jj"), is("THANK YOU JJ"));
+        assertThat(helloDeco.hoho("jj"), is("jj"));
         // BUT, 문제점 2개.
         // 1. 인터페이스의 모든 메소드 구현, 위임하도록 코드 만들어야함.
         // 2. 본 클래스의 부가기능(리턴을 대문자 변환)하는게 모든 메소드에 중복해서 나타남.
@@ -51,12 +53,14 @@ public class ReflectionTest {
         assertThat(proxiedHello.sayHello("jj"), is("HELLO JJ"));
         assertThat(proxiedHello.sayHi("jj"), is("HI JJ"));
         assertThat(proxiedHello.sayThankyou("jj"), is("THANK YOU JJ"));
+        assertThat(proxiedHello.hoho("jj"), is(" hoho JJ hoho "));
     }
 }
 interface Hello {
     String sayHello(String name);
     String sayHi(String name);
     String sayThankyou(String name);
+    String hoho(String name);
 }
 class HelloTarget implements Hello {
     @Override
@@ -70,6 +74,10 @@ class HelloTarget implements Hello {
     @Override
     public String sayThankyou(String name) {
         return "Thank you " + name;
+    }
+    @Override
+    public String hoho(String name) {
+        return name;
     }
 }
 // 데코레이터 패턴의 프록시 (부가기능 부여)
@@ -90,6 +98,10 @@ class HelloUpperCase implements Hello {
     public String sayThankyou(String name) {
         return hello.sayThankyou(name).toUpperCase();
     }
+    @Override
+    public String hoho(String name) {
+        return name;
+    }
 }
 // 다이내믹 프록시
 class UpperCaseHandler implements InvocationHandler {
@@ -101,8 +113,10 @@ class UpperCaseHandler implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         Object ret = method.invoke(target, args);
-        if(ret instanceof String){
+        if(ret instanceof String && method.getName().startsWith("say") ){
             return ((String) ret).toUpperCase();
+        } else if (ret instanceof String && method.getName().contains("hoho")) {
+            return " hoho " + ((String) ret).toUpperCase() + " hoho ";
         } else {
           return ret;
         }
