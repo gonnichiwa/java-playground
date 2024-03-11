@@ -1,11 +1,10 @@
 import springbook.user.User;
-import springbook.user.service.UserService;
 import springbook.user.service.UserServiceImpl;
 
-public class TestUserService extends UserServiceImpl {
+public class TestUserServiceImpl extends UserServiceImpl {
     private String id;
 
-    public TestUserService(String id) {
+    public TestUserServiceImpl(String id) {
         this.id = id;
     }
 

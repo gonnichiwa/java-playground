@@ -48,7 +48,7 @@ public class ReflectionTest {
         Hello proxiedHello = (Hello) Proxy.newProxyInstance(
                 UpperCaseHandler.class.getClassLoader(), // 다이내믹 프록시 (런타임에 인스턴스 생성하므로 클래스로더)
                 new Class[] {Hello.class}, // 다이내믹 프록시가 구현해야할 인터페이스
-                new UpperCaseHandler(new HelloTarget()) //
+                new UpperCaseHandler(new HelloTarget()) // 부가기능(UpperCaseHandler)와 위임공구리클래스(HelloTarget)
         );
         assertThat(proxiedHello.sayHello("jj"), is("HELLO JJ"));
         assertThat(proxiedHello.sayHi("jj"), is("HI JJ"));

@@ -11,11 +11,9 @@ import springbook.user.Level;
 import springbook.user.User;
 import springbook.user.dao.IUserDao;
 import springbook.user.dao.IUserDaoJdbc;
-import springbook.user.service.MockMailSender;
-import springbook.user.service.UserService;
-import springbook.user.service.UserServiceImpl;
-import springbook.user.service.UserServiceTx;
+import springbook.user.service.*;
 
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.List;
 
@@ -110,21 +108,30 @@ public class UserServiceTest {
 
     @Test
     public void upgradeAllOrNothing(){
-        TestUserService testUserService = new TestUserService(users.get(3).getId());
+        TestUserServiceImpl testUserServiceImpl = new TestUserServiceImpl(users.get(3).getId());
         // TestUserService는 applicationContext에 추가 안한 bean이므로 userDao와 dataSource를 bean DI 해줌.
-        testUserService.setUserDao(this.userDao);
-//        testUserService.setTransactionManager(this.transactionManager);
-        testUserService.setMailSender(this.mailSender);
+        testUserServiceImpl.setUserDao(this.userDao);
+        testUserServiceImpl.setMailSender(this.mailSender);
 
-        UserServiceTx txUserService = new UserServiceTx();
-        txUserService.setTransactionManager(this.transactionManager);
-        txUserService.setUserService(testUserService);
+//        UserServiceTx txUserService = new UserServiceTx();
+//        txUserService.setTransactionManager(this.transactionManager);
+//        txUserService.setUserService(testUserService);
+        TransactionHandler txHandler = new TransactionHandler(); // 프록시에서 타겟(TestUserService)이 뭔지 전달해줌.
+        txHandler.setTransactionManager(this.transactionManager);
+        txHandler.setTarget(testUserServiceImpl);
+        txHandler.setPattern("upgradeNextLevel");
+
+        UserService txUserService1 = (UserService) Proxy.newProxyInstance(
+                TransactionHandler.class.getClassLoader(),
+                new Class[] {UserService.class}, // 다이내믹 프록시(Proxy.newProxyInstance)가 구현해야할 인터페이스
+                txHandler
+        );
 
         userDao.deleteAll();
         for(User user: users) userDao.add(user);
 
         try {
-            txUserService.upgradeNextLevel();
+            txUserService1.upgradeNextLevel();
             // 위 upgradeNextLevelAllUsers() 정상 종료 되면 본 테스트케이스 이상있으므로 실패처리
             fail("TestUserServiceException excepted, but exit 0");
         } catch (TestUserServiceException e){
@@ -160,7 +167,6 @@ public class UserServiceTest {
         // verify() : 메소드 호출구조 확인
         // mockUserDao의 update() 가 2번 호출되어 파라미터 상관없이(any) User.class 오브젝트를 업데이트 하였는가?
         verify(mockUserDao, times(2)).update(any(User.class));
-//        verify(mockUserDao, times(2)).update(any(User.class));
         // mockUserDao의 update() 가 users.get(1)을 업데이트 하였는가?
         verify(mockUserDao).update(users.get(1));
         // users.get(1) 결과 데이터 확인
