@@ -1,6 +1,8 @@
 import org.junit.Test;
 
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -40,11 +42,17 @@ public class ReflectionTest {
         // BUT, 문제점 2개.
         // 1. 인터페이스의 모든 메소드 구현, 위임하도록 코드 만들어야함.
         // 2. 본 클래스의 부가기능(리턴을 대문자 변환)하는게 모든 메소드에 중복해서 나타남.
-
-
+        // 그래서 사용하는 다이내믹 프록시
+        Hello proxiedHello = (Hello) Proxy.newProxyInstance(
+                UpperCaseHandler.class.getClassLoader(), // 다이내믹 프록시 (런타임에 인스턴스 생성하므로 클래스로더)
+                new Class[] {Hello.class}, // 다이내믹 프록시가 구현해야할 인터페이스
+                new UpperCaseHandler(new HelloTarget()) //
+        );
+        assertThat(proxiedHello.sayHello("jj"), is("HELLO JJ"));
+        assertThat(proxiedHello.sayHi("jj"), is("HI JJ"));
+        assertThat(proxiedHello.sayThankyou("jj"), is("THANK YOU JJ"));
     }
 }
-
 interface Hello {
     String sayHello(String name);
     String sayHi(String name);
@@ -81,5 +89,18 @@ class HelloUpperCase implements Hello {
     @Override
     public String sayThankyou(String name) {
         return hello.sayThankyou(name).toUpperCase();
+    }
+}
+// 다이내믹 프록시
+class UpperCaseHandler implements InvocationHandler {
+    Hello target; // 타깃으로 위임하기 위한 타깃 오브젝트 주입 방법
+    public UpperCaseHandler(Hello target) {
+        // 타깃으로 위임하기 위한 타깃 오브젝트 주입 방법
+        this.target = target;
+    }
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        String ret = (String) method.invoke(target, args);
+        return ret.toUpperCase();
     }
 }
