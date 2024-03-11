@@ -93,14 +93,18 @@ class HelloUpperCase implements Hello {
 }
 // 다이내믹 프록시
 class UpperCaseHandler implements InvocationHandler {
-    Hello target; // 타깃으로 위임하기 위한 타깃 오브젝트 주입 방법
-    public UpperCaseHandler(Hello target) {
+    Object target; // 타깃으로 위임하기 위한 타깃 오브젝트 주입 방법
+    public UpperCaseHandler(Object target) { // 어떤 오브젝트를 줘도 적용 가능하도록
         // 타깃으로 위임하기 위한 타깃 오브젝트 주입 방법
         this.target = target;
     }
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        String ret = (String) method.invoke(target, args);
-        return ret.toUpperCase();
+        Object ret = method.invoke(target, args);
+        if(ret instanceof String){
+            return ((String) ret).toUpperCase();
+        } else {
+          return ret;
+        }
     }
 }
