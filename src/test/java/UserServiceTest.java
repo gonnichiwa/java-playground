@@ -1,13 +1,16 @@
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.mail.MailSender;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.transaction.PlatformTransactionManager;
 import springbook.user.Level;
 import springbook.user.User;
 import springbook.user.dao.IUserDao;
+import springbook.user.dao.IUserDaoJdbc;
 import springbook.user.service.MockMailSender;
 import springbook.user.service.UserService;
 import springbook.user.service.UserServiceImpl;
@@ -18,6 +21,7 @@ import java.util.List;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 import static springbook.user.service.UserServiceImpl.MIN_LOGCOUNT_FOR_SILVER;
 import static springbook.user.service.UserServiceImpl.MIN_RECOMMAND_FOR_GOLD;
 
@@ -40,11 +44,11 @@ public class UserServiceTest {
 
 
         this.users = Arrays.asList(
-                new User("1","n1","p1", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER-1, 0),
-                new User("2","n2","p2", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER, 0),
-                new User("3","n3","p3", Level.SILVER, 60, MIN_RECOMMAND_FOR_GOLD-1),
-                new User("4","n4","p4", Level.SILVER, 60, MIN_RECOMMAND_FOR_GOLD),
-                new User("5","n5","p5", Level.GOLD, 100, 100)
+                new User("1","n1","p1", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER-1, 0, "n1@mail.com"),
+                new User("2","n2","p2", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER, 0, "n2@mail.com"),
+                new User("3","n3","p3", Level.SILVER, 60, MIN_RECOMMAND_FOR_GOLD-1, "n3@mail.com"),
+                new User("4","n4","p4", Level.SILVER, 60, MIN_RECOMMAND_FOR_GOLD, "n4@mail.com"),
+                new User("5","n5","p5", Level.GOLD, 100, 100, "n5@mail.com")
         );
     }
 
@@ -52,7 +56,7 @@ public class UserServiceTest {
         userDao.deleteAll();
         for(User user : users) userDao.add(user);
 
-        userService.upgradeNextLevelAllUsers();
+        userService.upgradeNextLevel();
 
         checkLevelUpgrade(users.get(0), false);
         checkLevelUpgrade(users.get(1), true);
@@ -120,7 +124,7 @@ public class UserServiceTest {
         for(User user: users) userDao.add(user);
 
         try {
-            txUserService.upgradeNextLevelAllUsers();
+            txUserService.upgradeNextLevel();
             // 위 upgradeNextLevelAllUsers() 정상 종료 되면 본 테스트케이스 이상있으므로 실패처리
             fail("TestUserServiceException excepted, but exit 0");
         } catch (TestUserServiceException e){
@@ -128,6 +132,54 @@ public class UserServiceTest {
         }
 
         checkLevelUpgrade(users.get(1), false);
+    }
+
+    @Test
+    public void mockUpgradeLevels() throws Exception {
+        /*
+        * 셋팅
+        * */
+        UserServiceImpl userServiceImpl = new UserServiceImpl();
+
+        // mock 구조 생성
+        IUserDaoJdbc mockUserDao = mock(IUserDaoJdbc.class);
+        when(mockUserDao.getAll2()).thenReturn(this.users);
+        userServiceImpl.setUserDao(mockUserDao);
+
+        MailSender mockMailSender = mock(MailSender.class);
+        userServiceImpl.setMailSender(mockMailSender);
+
+        /*
+        * 실행
+        * */
+        userServiceImpl.upgradeNextLevel();
+
+        /*
+        * 결과 확인
+        * */
+        // verify() : 메소드 호출구조 확인
+        // mockUserDao의 update() 가 2번 호출되어 파라미터 상관없이(any) User.class 오브젝트를 업데이트 하였는가?
+        verify(mockUserDao, times(2)).update(any(User.class));
+//        verify(mockUserDao, times(2)).update(any(User.class));
+        // mockUserDao의 update() 가 users.get(1)을 업데이트 하였는가?
+        verify(mockUserDao).update(users.get(1));
+        // users.get(1) 결과 데이터 확인
+        assertThat(users.get(1).getLevel(), is(Level.SILVER));
+        // mockUserDao의 update() 가 users.get(3)을 업데이트 하였는가?
+        verify(mockUserDao).update(users.get(3));
+        // users.get(3) 결과 데이터 확인
+        assertThat(users.get(3).getLevel(), is(Level.GOLD));
+
+        // 메일 발송 결과 확인
+        // mockMailSender 오브젝트가 send()를 두번 호출하였는가?
+        // send 할 메세지를 캡처해놔.
+        ArgumentCaptor<SimpleMailMessage> mailMessageArg = ArgumentCaptor.forClass(SimpleMailMessage.class); // 메세지 캡처에 쓰는 ArgumentCaptor<T>
+        verify(mockMailSender, times(2)).send(mailMessageArg.capture());
+        // 보낸 메일 메세지들의 검증.
+        List<SimpleMailMessage> mailMessages = mailMessageArg.getAllValues();
+        assertThat(mailMessages.get(0).getTo()[0], is(users.get(1).getEmail()));
+        assertThat(mailMessages.get(1).getTo()[0], is(users.get(3).getEmail()));
+
     }
 
 

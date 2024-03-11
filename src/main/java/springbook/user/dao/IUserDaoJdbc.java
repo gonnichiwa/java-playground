@@ -143,7 +143,7 @@ public class IUserDaoJdbc implements IUserDao{
     public int getCount3(){
         return this.jdbcTemplate.queryForInt("select count(*) as count from users");
     }
-    public ArrayList<User> getAll(){
+    public List<User> getAll(){
         Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;

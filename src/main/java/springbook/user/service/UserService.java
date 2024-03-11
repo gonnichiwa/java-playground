@@ -4,5 +4,5 @@ import springbook.user.User;
 
 public interface UserService {
     void add(User user);
-    void upgradeNextLevelAllUsers();
+    void upgradeNextLevel();
 }

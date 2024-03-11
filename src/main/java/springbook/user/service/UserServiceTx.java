@@ -22,11 +22,11 @@ public class UserServiceTx implements UserService {
     }
 
     @Override
-    public void upgradeNextLevelAllUsers() {
+    public void upgradeNextLevel() {
         TransactionStatus status
                 = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
         try {
-            userService.upgradeNextLevelAllUsers();
+            userService.upgradeNextLevel();
             this.transactionManager.commit(status);
         } catch (RuntimeException e){
             this.transactionManager.rollback(status);

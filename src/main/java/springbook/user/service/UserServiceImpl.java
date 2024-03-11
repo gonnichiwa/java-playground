@@ -41,7 +41,7 @@ public class UserServiceImpl implements UserService {
     // SILVER 레벨 && 30번 추천이면 SILVER -> GOLD
     // 레벨 변경은 일정한 주기로 수행. 변경작업전에는 조건 충족하더라도 레벨 변경 없음.
     @Override
-    public void upgradeNextLevelAllUsers() {
+    public void upgradeNextLevel() {
         upgradeNextLevelsInternal();
     }
 
@@ -64,7 +64,7 @@ public class UserServiceImpl implements UserService {
         mailMessage.setTo(user.getEmail());
         mailMessage.setFrom("admin@ksug.org");
         mailMessage.setSubject("Upgrade 안내");
-        mailMessage.setText("사용자님의 등급이 " + user.getLevel().name());
+        mailMessage.setText("사용자님의 등급이 " + user.getLevel().name() + "로 변경되었습니다.");
 
         this.mailSender.send(mailMessage);
     }
