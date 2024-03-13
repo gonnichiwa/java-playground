@@ -6,6 +6,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.PlatformTransactionManager;
 import springbook.user.Level;
 import springbook.user.User;
@@ -31,8 +32,10 @@ public class UserServiceTest {
     PlatformTransactionManager transactionManager; // case upgradeAllOrNothing()에서 트랜잭션 실패 확인용
     MailSender mailSender;
 
+    ApplicationContext context;
+
     @Before public void SetUp() {
-        ApplicationContext context
+        this.context
                 = new ClassPathXmlApplicationContext("applicationContext.xml");
 //        ApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class); // DaoFactory.userDao() 생성자로 IUserDao 리턴하는걸로 바꿔줘야함.
         this.userDao = context.getBean("userDao", IUserDao.class);
@@ -107,31 +110,44 @@ public class UserServiceTest {
     }
 
     @Test
-    public void upgradeAllOrNothing(){
+    @DirtiesContext // 본 테스트 클래스 컨텍스트를 이 테스트 케이스에서 덮어씀.
+    public void upgradeAllOrNothing() throws Exception {
         TestUserServiceImpl testUserServiceImpl = new TestUserServiceImpl(users.get(3).getId());
         // TestUserService는 applicationContext에 추가 안한 bean이므로 userDao와 dataSource를 bean DI 해줌.
         testUserServiceImpl.setUserDao(this.userDao);
         testUserServiceImpl.setMailSender(this.mailSender);
 
+        // 프록시 처리 할 때 데코레이션 적용 예::
+        // context에서 UserServiceTx(UserService 공구리객체)가
+        // UserServiceImpl(UserService 공구리객체)을 보게 함.
 //        UserServiceTx txUserService = new UserServiceTx();
 //        txUserService.setTransactionManager(this.transactionManager);
 //        txUserService.setUserService(testUserService);
-        TransactionHandler txHandler = new TransactionHandler(); // 프록시에서 타겟(TestUserService)이 뭔지 전달해줌.
-        txHandler.setTransactionManager(this.transactionManager);
-        txHandler.setTarget(testUserServiceImpl);
-        txHandler.setPattern("upgradeNextLevel");
 
-        UserService txUserService1 = (UserService) Proxy.newProxyInstance(
-                TransactionHandler.class.getClassLoader(),
-                new Class[] {UserService.class}, // 다이내믹 프록시(Proxy.newProxyInstance)가 구현해야할 인터페이스
-                txHandler
-        );
+        // 다이내믹 프록시 처리 할 때::
+//        TransactionHandler txHandler = new TransactionHandler(); // 프록시에서 타겟(TestUserService)이 뭔지 전달해줌.
+//        txHandler.setTransactionManager(this.transactionManager);
+//        txHandler.setTarget(testUserServiceImpl);
+//        txHandler.setPattern("upgradeNextLevel");
+//        UserService txUserService = (UserService) Proxy.newProxyInstance(
+//                TransactionHandler.class.getClassLoader(),
+//                new Class[] {UserService.class}, // 다이내믹 프록시(Proxy.newProxyInstance)가 구현해야할 인터페이스
+//                txHandler
+//        );
+
+        // 다이내믹 프록시의 DI적용 팩토리빈::
+        // upgradeAllOrNothing() 테스트가 현재 context상 운영 소스와는 달리
+        // TestUserServiceImpl을 타겟으로 봐야하기 때문에
+        // 팩토리빈이 타겟삼을 구현객체를 다시 지정해줬다.
+        TxProxyFactoryBean txProxyFactoryBean = context.getBean("&userService", TxProxyFactoryBean.class);
+        txProxyFactoryBean.setTarget(testUserServiceImpl);
+        UserService txUserService = (UserService) txProxyFactoryBean.getObject();
 
         userDao.deleteAll();
         for(User user: users) userDao.add(user);
 
         try {
-            txUserService1.upgradeNextLevel();
+            txUserService.upgradeNextLevel();
             // 위 upgradeNextLevelAllUsers() 정상 종료 되면 본 테스트케이스 이상있으므로 실패처리
             fail("TestUserServiceException excepted, but exit 0");
         } catch (TestUserServiceException e){

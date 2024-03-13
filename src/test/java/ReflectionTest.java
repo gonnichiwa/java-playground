@@ -54,6 +54,9 @@ public class ReflectionTest {
         assertThat(proxiedHello.sayHi("jj"), is("HI JJ"));
         assertThat(proxiedHello.sayThankyou("jj"), is("THANK YOU JJ"));
         assertThat(proxiedHello.hoho("jj"), is(" hoho JJ hoho "));
+
+        // 스프링에 DI 하고싶다면?
+        // 다이내믹 프록시 패턴을 스프링에 적용하려면? ./FactoryBeanTest.java 참조할것.
     }
 }
 interface Hello {
