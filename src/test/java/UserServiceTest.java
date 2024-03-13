@@ -1,6 +1,10 @@
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.aop.ClassFilter;
+import org.springframework.aop.framework.ProxyFactoryBean;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.support.NameMatchMethodPointcut;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -139,9 +143,19 @@ public class UserServiceTest {
         // upgradeAllOrNothing() 테스트가 현재 context상 운영 소스와는 달리
         // TestUserServiceImpl을 타겟으로 봐야하기 때문에
         // 팩토리빈이 타겟삼을 구현객체를 다시 지정해줬다.
-        TxProxyFactoryBean txProxyFactoryBean = context.getBean("&userService", TxProxyFactoryBean.class);
-        txProxyFactoryBean.setTarget(testUserServiceImpl);
-        UserService txUserService = (UserService) txProxyFactoryBean.getObject();
+//        TxProxyFactoryBean txProxyFactoryBean = context.getBean("&userService", TxProxyFactoryBean.class);
+//        txProxyFactoryBean.setTarget(testUserServiceImpl);
+//        UserService txUserService = (UserService) txProxyFactoryBean.getObject();
+
+        // 포인트컷 적용
+        ProxyFactoryBean pfBean = new ProxyFactoryBean();
+        pfBean.setTarget(testUserServiceImpl);
+        NameMatchMethodPointcut pointcut = new NameMatchMethodPointcut();
+        pointcut.setMappedName("upgrade*");
+        TransactionAdvice txAdvice = new TransactionAdvice();
+        txAdvice.setTransactionManager(this.transactionManager);
+        pfBean.addAdvisor(new DefaultPointcutAdvisor(pointcut, txAdvice));
+        UserService txUserService = (UserService) pfBean.getObject();
 
         userDao.deleteAll();
         for(User user: users) userDao.add(user);

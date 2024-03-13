@@ -1,4 +1,9 @@
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
+import org.springframework.aop.framework.ProxyFactoryBean;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.support.NameMatchMethodPointcut;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -8,7 +13,6 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
 public class ReflectionTest {
-
     @Test
     public void invokeMethod() throws Exception {
         String name = "Spring";
@@ -25,7 +29,6 @@ public class ReflectionTest {
         Method charAtMethod = String.class.getMethod("charAt", int.class);
         assertThat(charAtMethod.invoke(name,0), is('S'));
     }
-
     @Test
     public void simpleProxy() {
         // 단순 구현
@@ -57,6 +60,46 @@ public class ReflectionTest {
 
         // 스프링에 DI 하고싶다면?
         // 다이내믹 프록시 패턴을 스프링에 적용하려면? ./FactoryBeanTest.java 참조할것.
+    }
+
+    @Test
+    public void proxyFactoryBean(){
+        ProxyFactoryBean pfBean = new ProxyFactoryBean();
+        pfBean.setTarget(new HelloTarget());
+        pfBean.addAdvice(new UppercaseAdvice());
+
+        Hello proxiedHello = (Hello) pfBean.getObject();
+        assertThat(proxiedHello.sayHello("jj"), is("HELLO JJ"));
+        assertThat(proxiedHello.sayHi("jj"), is("HI JJ"));
+        assertThat(proxiedHello.sayThankyou("jj"), is("THANK YOU JJ"));
+        assertThat(proxiedHello.hoho("jj"), is("JJ"));
+    }
+
+    // 포인트컷 : 부가기능(Advice) 적용 대상 메소드 선정방법(알고리즘)
+    @Test
+    public void pointcutAdvisor() {
+        ProxyFactoryBean pfBean = new ProxyFactoryBean();
+        pfBean.setTarget(new HelloTarget());
+
+        NameMatchMethodPointcut pointcut = new NameMatchMethodPointcut();
+        pointcut.setMappedName("sayH*"); // 메소드이름비교조건.
+        // Advisor = pointcut + advice
+        pfBean.addAdvisor(new DefaultPointcutAdvisor(pointcut, new UppercaseAdvice()));
+
+        Hello proxiedHello = (Hello) pfBean.getObject();
+        assertThat(proxiedHello.sayHello("jj"), is("HELLO JJ"));
+        assertThat(proxiedHello.sayHi("jj"), is("HI JJ"));
+        assertThat(proxiedHello.sayThankyou("jj"), is("Thank you jj")); // pointcut.setMappedName에 맞지 않으므로 타겟 객체 구현대로 돈다.
+        assertThat(proxiedHello.hoho("jj"), is("jj")); // pointcut.setMappedName에 맞지 않으므로 타겟 객체 구현대로 돈다.
+
+    }
+
+    static class UppercaseAdvice implements MethodInterceptor {
+        @Override
+        public Object invoke(MethodInvocation invocation) throws Throwable {
+            String ret = (String) invocation.proceed();
+            return ret.toUpperCase();
+        }
     }
 }
 interface Hello {
@@ -115,6 +158,7 @@ class UpperCaseHandler implements InvocationHandler {
     }
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        // 메소드 선택 기준의 알고리즘에 invoke가 의존하고 있음.
         Object ret = method.invoke(target, args);
         if(ret instanceof String && method.getName().startsWith("say") ){
             return ((String) ret).toUpperCase();

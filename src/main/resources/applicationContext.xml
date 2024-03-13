@@ -43,6 +43,7 @@ http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 <!--        <property name="userService" ref="userServiceImpl"/>-->
 <!--    </bean>-->
     <!-- 팩토리빈 -->
+    <!-- 한계 : coreService등 다른 service들이 사용하는 것들 백개 이상 되면 여기에도 xml 600줄 추가 되어야 한다..-->
     <bean id="userService" class="springbook.user.service.TxProxyFactoryBean">
         <property name="target" ref="userServiceImpl"/>
         <property name="transactionManager" ref="myPlatformTransactionManager"/>
