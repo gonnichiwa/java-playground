@@ -44,11 +44,35 @@ http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 <!--    </bean>-->
     <!-- 팩토리빈 -->
     <!-- 한계 : coreService등 다른 service들이 사용하는 것들 백개 이상 되면 여기에도 xml 600줄 추가 되어야 한다..-->
-    <bean id="userService" class="springbook.user.service.TxProxyFactoryBean">
-        <property name="target" ref="userServiceImpl"/>
+<!--    <bean id="userService" class="springbook.user.service.TxProxyFactoryBean">-->
+<!--        <property name="target" ref="userServiceImpl"/>-->
+<!--        <property name="transactionManager" ref="myPlatformTransactionManager"/>-->
+<!--        <property name="pattern" value="upgradeNextLevel"/>-->
+<!--        <property name="serviceInterface" value="springbook.user.service.UserService"/>-->
+<!--    </bean>-->
+
+    <!-- ProxyFactoryBean 의 포인트컷 + advice, context처리 -->
+        <!-- advice : 프록시역할의 구상클래스(여기선 UserServiceImpl) 부가기능 -->
+    <bean id="tranactionAdvice" class="springbook.user.service.TransactionAdvice">
         <property name="transactionManager" ref="myPlatformTransactionManager"/>
-        <property name="pattern" value="upgradeNextLevel"/>
-        <property name="serviceInterface" value="springbook.user.service.UserService"/>
+    </bean>
+        <!-- 포인트컷 : 어떤 메소드를 Advisor에 포함시킬건가? -->
+    <bean id="transactionPointcut" class="org.springframework.aop.support.NameMatchMethodPointcut">
+        <property name="mappedName" value="upgrade*"/>
+    </bean>
+    <bean id="transactionAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
+        <property name="advice" ref="tranactionAdvice"/>
+        <property name="pointcut" ref="transactionPointcut"/>
+        <property name="order" value="1"/>
+    </bean>
+    <bean id="userService" class="org.springframework.aop.framework.ProxyFactoryBean">
+        <property name="target" ref="userServiceImpl"/>
+        <!-- advisor || advice 들어갈수있으므로 interceptorNames. (advisor가 아니다)-->
+        <property name="interceptorNames">
+            <list>
+                <value>transactionAdvisor</value>
+            </list>
+        </property>
     </bean>
     <!-- UserServiceImpl : 타깃 userservice를 호출해 쓰는 클라이언트 입장에서 타깃. -->
     <bean id="userServiceImpl" class="springbook.user.service.UserServiceImpl">

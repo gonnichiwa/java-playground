@@ -147,14 +147,17 @@ public class UserServiceTest {
 //        txProxyFactoryBean.setTarget(testUserServiceImpl);
 //        UserService txUserService = (UserService) txProxyFactoryBean.getObject();
 
-        // 포인트컷 적용
-        ProxyFactoryBean pfBean = new ProxyFactoryBean();
+        // 포인트컷 적용 :: (setter)
+//        ProxyFactoryBean pfBean = new ProxyFactoryBean();
+//        pfBean.setTarget(testUserServiceImpl);
+//        NameMatchMethodPointcut pointcut = new NameMatchMethodPointcut();
+//        pointcut.setMappedName("upgrade*");
+//        TransactionAdvice txAdvice = new TransactionAdvice();
+//        txAdvice.setTransactionManager(this.transactionManager);
+//        pfBean.addAdvisor(new DefaultPointcutAdvisor(pointcut, txAdvice));
+        // 포인트컷 적용 :: (context.xml)
+        ProxyFactoryBean pfBean = context.getBean("&userService", ProxyFactoryBean.class);
         pfBean.setTarget(testUserServiceImpl);
-        NameMatchMethodPointcut pointcut = new NameMatchMethodPointcut();
-        pointcut.setMappedName("upgrade*");
-        TransactionAdvice txAdvice = new TransactionAdvice();
-        txAdvice.setTransactionManager(this.transactionManager);
-        pfBean.addAdvisor(new DefaultPointcutAdvisor(pointcut, txAdvice));
         UserService txUserService = (UserService) pfBean.getObject();
 
         userDao.deleteAll();
