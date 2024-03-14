@@ -2,6 +2,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.aop.ClassFilter;
+import org.springframework.aop.Pointcut;
 import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.NameMatchMethodPointcut;
@@ -114,6 +115,53 @@ public class UserServiceTest {
     }
 
     @Test
+    public void mockUpgradeLevels() throws Exception {
+        /*
+         * 셋팅
+         * */
+        UserServiceImpl userServiceImpl = new UserServiceImpl();
+
+        // mock 구조 생성
+        IUserDaoJdbc mockUserDao = mock(IUserDaoJdbc.class);
+        when(mockUserDao.getAll2()).thenReturn(this.users);
+        userServiceImpl.setUserDao(mockUserDao);
+
+        MailSender mockMailSender = mock(MailSender.class);
+        userServiceImpl.setMailSender(mockMailSender);
+
+        /*
+         * 실행
+         * */
+        userServiceImpl.upgradeNextLevel();
+
+        /*
+         * 결과 확인
+         * */
+        // verify() : 메소드 호출구조 확인
+        // mockUserDao의 update() 가 2번 호출되어 파라미터 상관없이(any) User.class 오브젝트를 업데이트 하였는가?
+        verify(mockUserDao, times(2)).update(any(User.class));
+        // mockUserDao의 update() 가 users.get(1)을 업데이트 하였는가?
+        verify(mockUserDao).update(users.get(1));
+        // users.get(1) 결과 데이터 확인
+        assertThat(users.get(1).getLevel(), is(Level.SILVER));
+        // mockUserDao의 update() 가 users.get(3)을 업데이트 하였는가?
+        verify(mockUserDao).update(users.get(3));
+        // users.get(3) 결과 데이터 확인
+        assertThat(users.get(3).getLevel(), is(Level.GOLD));
+
+        // 메일 발송 결과 확인
+        // mockMailSender 오브젝트가 send()를 두번 호출하였는가?
+        // send 할 메세지를 캡처해놔.
+        ArgumentCaptor<SimpleMailMessage> mailMessageArg = ArgumentCaptor.forClass(SimpleMailMessage.class); // 메세지 캡처에 쓰는 ArgumentCaptor<T>
+        verify(mockMailSender, times(2)).send(mailMessageArg.capture());
+        // 보낸 메일 메세지들의 검증.
+        List<SimpleMailMessage> mailMessages = mailMessageArg.getAllValues();
+        assertThat(mailMessages.get(0).getTo()[0], is(users.get(1).getEmail()));
+        assertThat(mailMessages.get(1).getTo()[0], is(users.get(3).getEmail()));
+
+    }
+
+    @Test
     @DirtiesContext // 본 테스트 클래스 컨텍스트를 이 테스트 케이스에서 덮어씀.
     public void upgradeAllOrNothing() throws Exception {
         TestUserServiceImpl testUserServiceImpl = new TestUserServiceImpl(users.get(3).getId());
@@ -175,51 +223,42 @@ public class UserServiceTest {
     }
 
     @Test
-    public void mockUpgradeLevels() throws Exception {
-        /*
-        * 셋팅
-        * */
-        UserServiceImpl userServiceImpl = new UserServiceImpl();
+    public void classNamePointcutAdvisor() {
+        // 포인트컷 준비
+        NameMatchMethodPointcut classMethodPointCut = new NameMatchMethodPointcut() {
+            public ClassFilter getClassFilter() {
+                return new ClassFilter() {
+                    @Override
+                    public boolean matches(Class<?> clazz) {
+                        return clazz.getSimpleName().startsWith("HelloT"); // 클래스 이름이 HelloT로 시작하는것만 선정함.
+                    }
+                };
+            }
+        };
+        classMethodPointCut.setMappedName("sayH*"); // 메소드이름이 SayH 로 시작하는 메소드만 선정함.
 
-        // mock 구조 생성
-        IUserDaoJdbc mockUserDao = mock(IUserDaoJdbc.class);
-        when(mockUserDao.getAll2()).thenReturn(this.users);
-        userServiceImpl.setUserDao(mockUserDao);
-
-        MailSender mockMailSender = mock(MailSender.class);
-        userServiceImpl.setMailSender(mockMailSender);
-
-        /*
-        * 실행
-        * */
-        userServiceImpl.upgradeNextLevel();
-
-        /*
-        * 결과 확인
-        * */
-        // verify() : 메소드 호출구조 확인
-        // mockUserDao의 update() 가 2번 호출되어 파라미터 상관없이(any) User.class 오브젝트를 업데이트 하였는가?
-        verify(mockUserDao, times(2)).update(any(User.class));
-        // mockUserDao의 update() 가 users.get(1)을 업데이트 하였는가?
-        verify(mockUserDao).update(users.get(1));
-        // users.get(1) 결과 데이터 확인
-        assertThat(users.get(1).getLevel(), is(Level.SILVER));
-        // mockUserDao의 update() 가 users.get(3)을 업데이트 하였는가?
-        verify(mockUserDao).update(users.get(3));
-        // users.get(3) 결과 데이터 확인
-        assertThat(users.get(3).getLevel(), is(Level.GOLD));
-
-        // 메일 발송 결과 확인
-        // mockMailSender 오브젝트가 send()를 두번 호출하였는가?
-        // send 할 메세지를 캡처해놔.
-        ArgumentCaptor<SimpleMailMessage> mailMessageArg = ArgumentCaptor.forClass(SimpleMailMessage.class); // 메세지 캡처에 쓰는 ArgumentCaptor<T>
-        verify(mockMailSender, times(2)).send(mailMessageArg.capture());
-        // 보낸 메일 메세지들의 검증.
-        List<SimpleMailMessage> mailMessages = mailMessageArg.getAllValues();
-        assertThat(mailMessages.get(0).getTo()[0], is(users.get(1).getEmail()));
-        assertThat(mailMessages.get(1).getTo()[0], is(users.get(3).getEmail()));
-
+        // test
+        checkAdvice(new HelloTarget(), classMethodPointCut, true); // 적용대상
+        class HelloWorld extends HelloTarget {} //
+        checkAdvice(new HelloWorld(), classMethodPointCut, false); // 적용대상 아닌 클래스이름
+        class HelloTaxi extends HelloTarget {}
+        checkAdvice(new HelloTaxi(), classMethodPointCut, true); // 적용대상인 클래스이름
     }
 
+    private void checkAdvice(Object target, Pointcut po, boolean adviced) {
+        ProxyFactoryBean pfBean = new ProxyFactoryBean();
+        pfBean.setTarget(target);
+        pfBean.addAdvisor(new DefaultPointcutAdvisor(po, new UppercaseAdvice()));
+        Hello proxiedHello = (Hello) pfBean.getObject();
 
+        if(adviced){
+            assertThat(proxiedHello.sayHello("jj"), is("HELLO JJ"));
+            assertThat(proxiedHello.sayHi("jj"), is("HI JJ"));
+            assertThat(proxiedHello.sayThankyou("jj"), is("Thank you jj"));
+        } else {
+            assertThat(proxiedHello.sayHello("jj"), is("Hello jj"));
+            assertThat(proxiedHello.sayHi("jj"), is("Hi jj"));
+            assertThat(proxiedHello.sayThankyou("jj"), is("Thank you jj"));
+        }
+    }
 }

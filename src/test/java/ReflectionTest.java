@@ -94,12 +94,12 @@ public class ReflectionTest {
 
     }
 
-    static class UppercaseAdvice implements MethodInterceptor {
-        @Override
-        public Object invoke(MethodInvocation invocation) throws Throwable {
-            String ret = (String) invocation.proceed();
-            return ret.toUpperCase();
-        }
+}
+class UppercaseAdvice implements MethodInterceptor {
+    @Override
+    public Object invoke(MethodInvocation invocation) throws Throwable {
+        String ret = (String) invocation.proceed();
+        return ret.toUpperCase();
     }
 }
 interface Hello {
