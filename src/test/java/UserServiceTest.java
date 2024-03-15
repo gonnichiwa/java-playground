@@ -225,17 +225,9 @@ public class UserServiceTest {
     @Test
     public void classNamePointcutAdvisor() {
         // 포인트컷 준비
-        NameMatchMethodPointcut classMethodPointCut = new NameMatchMethodPointcut() {
-            public ClassFilter getClassFilter() {
-                return new ClassFilter() {
-                    @Override
-                    public boolean matches(Class<?> clazz) {
-                        return clazz.getSimpleName().startsWith("HelloT"); // 클래스 이름이 HelloT로 시작하는것만 선정함.
-                    }
-                };
-            }
-        };
-        classMethodPointCut.setMappedName("sayH*"); // 메소드이름이 SayH 로 시작하는 메소드만 선정함.
+        NameMatchClassMethodPointcut classMethodPointCut = new NameMatchClassMethodPointcut();
+        classMethodPointCut.setClassMappedName("HelloT*");
+        classMethodPointCut.setMappedName("sayH*");
 
         // test
         checkAdvice(new HelloTarget(), classMethodPointCut, true); // 적용대상
