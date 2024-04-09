@@ -35,7 +35,11 @@ public class LambdaTest {
 interface Printer {
     String print(String str, String str2);
     // @FunctionalInterface 는 추상메소드가 하나여야만 한다.
-    // 본 인터페이스로 람다식 구현되어 있다면 메소드 추가할 수 없다.
+    // 본 인터페이스 이용하여 클라이언트 객체에서 익명클래스 람다식 구현되어 있다면 메소드 추가할 수 없다.
       // 바로 아래줄 주석 풀면 테스트 코드 컴파일 안됨.
 //    void print2();
+    default String print(String a){
+        // ...
+        return a;
+    }
 }
