@@ -38,6 +38,10 @@ public class ReflectionTest {
         assertThat(hello.sayThankyou("jj"), is("Thank you jj"));
         assertThat(hello.hoho("jj"), is("jj"));
 
+    }
+
+    @Test
+    public void decorator(){
         // 데코레이터 패턴 적용(부가기능 객체HelloUppercase) 적용
         Hello helloDeco = new HelloUpperCase(new HelloTarget());
         assertThat(helloDeco.sayHello("jj"), is("HELLO JJ"));
@@ -47,6 +51,11 @@ public class ReflectionTest {
         // BUT, 문제점 2개.
         // 1. 인터페이스의 모든 메소드 구현, 위임하도록 코드 만들어야함.
         // 2. 본 클래스의 부가기능(리턴을 대문자 변환)하는게 모든 메소드에 중복해서 나타남.
+        // 그래서 사용하는 다이내믹 프록시 (아래 dynamicProxy() 보기)
+    }
+
+    @Test
+    public void dynamicProxy(){
         // 그래서 사용하는 다이내믹 프록시
         Hello proxiedHello = (Hello) Proxy.newProxyInstance(
                 UpperCaseHandler.class.getClassLoader(), // 다이내믹 프록시 (런타임에 인스턴스 생성하므로 클래스로더)
@@ -57,7 +66,6 @@ public class ReflectionTest {
         assertThat(proxiedHello.sayHi("jj"), is("HI JJ"));
         assertThat(proxiedHello.sayThankyou("jj"), is("THANK YOU JJ"));
         assertThat(proxiedHello.hoho("jj"), is(" hoho JJ hoho "));
-
         // 스프링에 DI 하고싶다면?
         // 다이내믹 프록시 패턴을 스프링에 적용하려면? ./FactoryBeanTest.java 참조할것.
     }
@@ -91,7 +99,6 @@ public class ReflectionTest {
         assertThat(proxiedHello.sayHi("jj"), is("HI JJ"));
         assertThat(proxiedHello.sayThankyou("jj"), is("Thank you jj")); // pointcut.setMappedName에 맞지 않으므로 타겟 객체 구현대로 돈다.
         assertThat(proxiedHello.hoho("jj"), is("jj")); // pointcut.setMappedName에 맞지 않으므로 타겟 객체 구현대로 돈다.
-
     }
 
 }
