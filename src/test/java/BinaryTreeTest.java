@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 public class BinaryTreeTest {
 
@@ -15,24 +15,26 @@ public class BinaryTreeTest {
     public void setTree(){
         /*
          * 아래 트리를 구현
+         *         6
+         *    4         8
+         *  3  5     7    9
+         *                  11
+         *                10  15
          * */
         this.bt = new BinaryTree();
-        /*
-        *       6
-        *    4     8
-        *  3  5   7  9
-        * */
-        List<Integer> nums = Arrays.asList(6,4,8,3,5,7,9);
+        List<Integer> nums = Arrays.asList(6,4,8,3,5,7,9,11,15,10);
         for(int a : nums){
             bt.add(a);
         }
     }
     @Test
-    public void linked(){
+    public void isContains(){
         assertThat(bt.isContainsNode(9), is(true));
         assertThat(bt.isContainsNode(7), is(true));
         assertThat(bt.isContainsNode(5), is(true));
         assertThat(bt.isContainsNode(3), is(true));
+        assertThat(bt.isContainsNode(11), is(true));
+        assertThat(bt.isContainsNode(15), is(true));
         assertThat(bt.isContainsNode(8), is(true));
         assertThat(bt.isContainsNode(4), is(true));
         assertThat(bt.isContainsNode(6), is(true));
@@ -40,10 +42,18 @@ public class BinaryTreeTest {
         assertThat(bt.isContainsNode(12), is(false));
     }
 
+    @Test
+    public void deleteTest(){
+        assertTrue(bt.isContainsNode(11));
+        bt.delete(11);
+        assertFalse(bt.isContainsNode(11));
+    }
+
 }
 interface IBinaryTree {
     void add(int value);
     boolean isContainsNode(int value);
+    void delete(int value);
 
 }
 class BinaryTree implements IBinaryTree {
@@ -57,6 +67,41 @@ class BinaryTree implements IBinaryTree {
     @Override
     public boolean isContainsNode(int value) {
         return containsRecursive(root, value);
+    }
+
+    @Override
+    public void delete(int value) {
+        root = deleteRecursive(root, value);
+    }
+
+    private Node deleteRecursive(Node current, int value) {
+        if(current == null) return null;
+
+        if(current.value == value){
+            // node has no child
+            if(current.left == null && current.right == null){
+                return null;
+            }
+            // node has one child
+            if(current.right == null) return current.left;
+            if(current.left == null) return current.right;
+            // node has 2 child
+            int smallestValue = findSmallestValue(current.right, value);
+            current.value = smallestValue;
+            current.right = deleteRecursive(current.right, smallestValue);
+            return current;
+        }
+
+        if(value < current.value){
+            return deleteRecursive(current.left, value);
+        }
+        current.right = deleteRecursive(current.right, value);
+        return current;
+
+    }
+
+    private int findSmallestValue(Node current, int value) {
+        return current.left == null ? current.value : findSmallestValue(current.right, value);
     }
 
     private boolean containsRecursive(Node current, int value) {
