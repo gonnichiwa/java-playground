@@ -20,6 +20,9 @@ public class BinaryTreeTest {
          *  3  5     7    9
          *                  11
          *                10  15
+         * 이진트리 원칙 1 : 왼쪽자식노드 < 부모노드값 < 오른쪽자식노드
+         * 이후 추가되는 값에 따라 노드 위치 정해짐
+         * 삭제시 : 아래 deleteRecursive() 참조
          * */
         this.bt = new BinaryTree();
         List<Integer> nums = Arrays.asList(6,4,8,3,5,7,9,11,15,10);
@@ -85,6 +88,7 @@ class BinaryTree implements IBinaryTree {
             // node has one child
             if(current.right == null) return current.left;
             if(current.left == null) return current.right;
+
             // node has 2 child
             int smallestValue = findSmallestValue(current.right, value);
             current.value = smallestValue;
