@@ -52,13 +52,32 @@ public class BinaryTreeTest {
         assertFalse(bt.isContainsNode(11));
     }
 
+    @Test
+    public void traverseInOrderTest(){
+        bt.traverseInOrder(bt.getRootNode());
+    }
+
+    @Test
+    public void traversePreOrderTest(){
+        bt.traversePreOrder(bt.getRootNode());
+    }
+
+    @Test
+    public void traversePostOrderTest(){
+        bt.traversePostOrder(bt.getRootNode());
+    }
+
 }
 interface IBinaryTree {
     void add(int value);
     boolean isContainsNode(int value);
     void delete(int value);
-
+    void traverseInOrder(Node node);
+    void traversePreOrder(Node node);
+    Node getRootNode();
+    void traversePostOrder(Node rootNode);
 }
+
 class BinaryTree implements IBinaryTree {
     Node root;
 
@@ -75,6 +94,38 @@ class BinaryTree implements IBinaryTree {
     @Override
     public void delete(int value) {
         root = deleteRecursive(root, value);
+    }
+
+    @Override
+    public void traverseInOrder(Node node) {
+        if(node != null){
+            traverseInOrder(node.left);
+            System.out.print(" " + node.value);
+            traverseInOrder(node.right);
+        }
+    }
+
+    @Override
+    public void traversePreOrder(Node node) {
+        if(node != null){
+            System.out.print(" " + node.value);
+            traversePreOrder(node.left);
+            traversePreOrder(node.right);
+        }
+    }
+
+    @Override
+    public void traversePostOrder(Node node) {
+        if(node != null){
+            traversePostOrder(node.left);
+            traversePostOrder(node.right);
+            System.out.print(" " + node.value);
+        }
+    }
+
+    @Override
+    public Node getRootNode() {
+        return root;
     }
 
     private Node deleteRecursive(Node current, int value) {
