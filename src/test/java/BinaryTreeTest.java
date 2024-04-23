@@ -2,7 +2,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
@@ -67,6 +69,11 @@ public class BinaryTreeTest {
         bt.traversePostOrder(bt.getRootNode());
     }
 
+    @Test
+    public void traverseLevelOrderTest(){
+        bt.traverseLevelOrder(bt.getRootNode());
+    }
+
 }
 interface IBinaryTree {
     void add(int value);
@@ -76,6 +83,7 @@ interface IBinaryTree {
     void traversePreOrder(Node node);
     Node getRootNode();
     void traversePostOrder(Node rootNode);
+    void traverseLevelOrder(Node rootNode);
 }
 
 class BinaryTree implements IBinaryTree {
@@ -120,6 +128,26 @@ class BinaryTree implements IBinaryTree {
             traversePostOrder(node.left);
             traversePostOrder(node.right);
             System.out.print(" " + node.value);
+        }
+    }
+
+    @Override
+    public void traverseLevelOrder(Node current) {
+        if(current != null){
+            Queue<Node> q = new LinkedList<>();
+            q.add(current);
+            while(!q.isEmpty()){
+                Node n = q.remove();
+                System.out.print(" " + n.value);
+
+                if(n.left != null){
+                    q.add(n.left);
+                }
+
+                if(n.right != null){
+                    q.add(n.right);
+                }
+            }
         }
     }
 

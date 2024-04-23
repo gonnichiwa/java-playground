@@ -11,7 +11,7 @@ import static org.junit.Assert.assertThat;
 public class BinarySearchTest {
 
     ArrayList<Integer> arr;
-    int wantFind = 2352435;
+    int wantFind = 15252;
 
     @Before
     public void insertValues(){
