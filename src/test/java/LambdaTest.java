@@ -31,15 +31,15 @@ public class LambdaTest {
 
 }
 
-//@FunctionalInterface // 람다식을 적용할 수 있는 인터페이스
+@FunctionalInterface // 람다식을 적용할 수 있는 인터페이스
 interface Printer {
     String print(String str, String str2);
-    // @FunctionalInterface 는 추상메소드가 하나여야만 한다.
+    // @FunctionalInterface 는 추상메소드가 하나여야만 하지만 더 추가하고 싶다면 default 추상메소드 넣어야 함.
     // 본 인터페이스 이용하여 클라이언트 객체에서 익명클래스 람다식 구현되어 있다면 메소드 추가할 수 없다.
       // 바로 아래줄 주석 풀면 테스트 코드 컴파일 안됨.
 //    void print2();
     default String print(String a){
         // ...
-        return a;
+        return a + "..";
     }
 }
