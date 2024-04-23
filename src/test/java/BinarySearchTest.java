@@ -11,7 +11,7 @@ import static org.junit.Assert.assertThat;
 public class BinarySearchTest {
 
     ArrayList<Integer> arr;
-    int wantFind = 143534;
+    int wantFind = 2352435;
 
     @Before
     public void insertValues(){
@@ -46,6 +46,16 @@ public class BinarySearchTest {
         assertThat(finded, is(wantFind));
     }
 
+    /**
+     * middle - 1, middle + 1의 의미 ::
+     * 1. 찾고자 하는 값(wantFind)이 middle idx 값 과의 비교가 이미 끝났으므로
+     *   wantFind < middle 이면 middle - 1
+     *   middle < wantFind 이면 middle + 1
+     * 2. 찾고자 하는 값(watnFind) 가 없을때, middle +- 1 안주면..
+     *   stackoverflow 발생함.
+     *   왜? middle은 / 2 해서 얻어지므로 끝인덱스에 완전히 도달할 수 없음
+     *   ex) (lIdx)199999 + (hIdx)200000 / 2 = 199999 (199999.5 에서 버림 처리)
+     * */
     private boolean binSearch(ArrayList<Integer> arr, int wantFind, int lIdx, int hIdx) {
         if(lIdx <= hIdx) {
             int middle = (lIdx + hIdx) / 2;
