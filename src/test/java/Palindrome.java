@@ -10,7 +10,7 @@ public class Palindrome {
         String palindrome = "소주만병만주소";
         String notPalindrome = "소주만병좀주소";
 
-        assertThat(isPalindrome(palindrome, 0, palindrome.length()-1), is(true) );
+        assertThat(isPalindrome(palindrome,    0, palindrome.length() - 1), is(true) );
         assertThat(isPalindrome(notPalindrome, 0, palindrome.length() - 1), is(false) );
     }
 

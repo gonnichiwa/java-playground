@@ -23,32 +23,33 @@ public class PredicateTest {
 
     @Test
     public void predicateChaining() {
+        // conditions..
         Predicate<Integer> greaterThanTen = (i) -> i > 10;
-
-        // Creating predicate
         Predicate<Integer> lowerThanTwenty = (i) -> i < 20;
-        boolean result = greaterThanTen.and(lowerThanTwenty).test(15);
-        System.out.println(result); // true
 
         // Calling Predicate method
+        // get result and conditions
+        boolean result = greaterThanTen.and(lowerThanTwenty).test(15);
+        System.out.println(result); // true
         boolean result2 = greaterThanTen.and(lowerThanTwenty).negate().test(15);
-        System.out.println(result2); // false
+        System.out.println(result2); // false (negate)
         boolean result2_1 = greaterThanTen.and(lowerThanTwenty).negate().test(21);
         System.out.println(result2_1); // true
 
+        // 한글 입력 여부 검사
         Predicate<String> isHangulIncluded = str -> {
             return str.matches(".*[ㄱ-ㅎㅏ-ㅣ가-힣]+.*");
         };
         boolean result3 = isHangulIncluded.test("nameabc안");
-        boolean result3_1 = isHangulIncluded.negate().test("nameabc안");
         System.out.println(result3); // true
+        boolean result3_1 = isHangulIncluded.negate().test("nameabc안");
         System.out.println(result3_1); // false
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void existNumber(){
-        pred(3, i -> i < 7);
-        pred(15, i -> i < 7);
+        pred(3, i -> i < 7); // pass
+        pred(15, i -> i < 7); // IllegalArgumentException
     }
 
     private void pred(int number, Predicate<Integer> pred){

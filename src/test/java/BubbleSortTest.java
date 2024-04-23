@@ -14,21 +14,24 @@ public class BubbleSortTest {
         System.out.println(Arrays.toString(arr));
         assertThat(arr, is(new int[]{1, 2, 3, 3, 4, 5}));
     }
-    public int[] bubbleSort (int[] arr, int last){
-        if(last > 0) {
-            for (int i = 1; i < last; i++){
-                if(arr[i] < arr[i-1] ){
-                    arr = swap(arr, i, i-1);
+
+    private void bubbleSort(int[] arr, int last) {
+        if(last > 0){
+            for(int i = 1; i < last; i++){
+                if(arr[i-1] > arr[i]){
+                    arr = swap(arr, i-1, i);
                 }
             }
-            arr = bubbleSort(arr, last - 1);
+            bubbleSort(arr, --last);
         }
+    }
+
+    private int[] swap(int[] arr, int l, int r){
+        int temp = arr[l];
+        arr[l] = arr[r];
+        arr[r] = temp;
         return arr;
     }
-    public int[] swap (int[] arr, int left, int right) {
-        int temp = arr[left];
-        arr[left] = arr[right];
-        arr[right] = temp;
-        return arr;
-    }
+
+
 }
