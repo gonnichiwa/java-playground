@@ -12,7 +12,7 @@ import java.lang.reflect.Proxy;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
-public class ReflectionTest {
+public class ReflectionProxyTest {
     @Test
     public void invokeMethod() throws Exception {
         String name = "Spring";
