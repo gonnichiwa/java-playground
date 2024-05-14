@@ -7,8 +7,8 @@
 
 - open on intellij IDEA
 
-- file - project structure 
-![](https://blog.kakaocdn.net/dn/S1LQr/btsHpbeotJy/tUX0kEC3npnL2YKziK26Tk/img.png)
++ file - project structure
+  - ![](https://blog.kakaocdn.net/dn/S1LQr/btsHpbeotJy/tUX0kEC3npnL2YKziK26Tk/img.png)
 
 + Project Settings
   1. Project
