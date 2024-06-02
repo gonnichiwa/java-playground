@@ -3,7 +3,11 @@ import org.junit.Test;
 
 import java.util.*;
 import java.util.regex.Pattern;
-import java.util.stream.*;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -64,9 +68,9 @@ public class StreamTest {
     }
 
     @Test
-    public void solutionT(){
+    public void solutionT() {
         int[] arr = {0, 1, 2, 4, 3};
-        int[][] queries = {{0, 4, 2},{0, 3, 2},{0, 2, 2}};
+        int[][] queries = {{0, 4, 2}, {0, 3, 2}, {0, 2, 2}};
         /*
         * 첫 번째 쿼리의 범위에는 0, 1, 2, 4, 3이 있으며 이 중 2보다 크면서 가장 작은 값은 3입니다.
           두 번째 쿼리의 범위에는 0, 1, 2, 4가 있으며 이 중 2보다 크면서 가장 작은 값은 4입니다.
@@ -74,10 +78,44 @@ public class StreamTest {
             따라서 [3, 4, -1]을 return 합니다.
         * */
         int[] result = solution2(arr, queries);
+    }
+    /*문제 설명
+    모든 자연수 x에 대해서 현재 값이 x이면 x가 짝수일 때는 2로 나누고, x가 홀수일 때는 3 * x + 1로 바꾸는 계산을 계속해서
+    반복하면 언젠가는 반드시 x가 1이 되는지 묻는 문제를 콜라츠 문제라고 부릅니다.
+    그리고 위 과정에서 거쳐간 모든 수를 기록한 수열을 콜라츠 수열이라고 부릅니다.
+    계산 결과 1,000 보다 작거나 같은 수에 대해서는 전부 언젠가 1에 도달한다는 것이 알려져 있습니다.
+    임의의 1,000 보다 작거나 같은 양의 정수 n이 주어질 때 초기값이 n인 콜라츠 수열을 return 하는 solution 함수를 완성해 주세요.
+    */
+    @Test
+    public void solution181919() {
+        int[] result = solution181919(10);
+        for(int i: result){
+            System.out.print(i + " ");
+        }
+    }
+    public int[] solution181919(int n) {
+        List<Integer> l = new ArrayList<>();
+        int x = n;
+        while(x != 1) {
+            l.add(x);
+            if(x % 2 == 0){
+                x = x / 2;
+            } else {
+                x = 3 * x + 1;
+            }
+        }
+        return l.stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    @Test
+    public void test181918(){
+        int[] given = new int[]{1,4,2,5,3};
+        int[] result = solution181918_stack(given);
         for(int i : result){
             System.out.print(i + " ");
         }
     }
+
 
     public int[] solution2(int[] arr, int[][] queries) {
         int[] answer = {};
@@ -257,6 +295,49 @@ public class StreamTest {
         String answer = abc + i;
         System.out.println(answer);
     }
+
+    public int[] solution181918_stack(int[] arr){
+        Stack<Integer> s = new Stack<>();
+        int i = 0;
+        while(i < arr.length){
+            if(s.isEmpty()){
+                s.add(arr[i]);
+                i += 1;
+            } else if(!s.isEmpty() && s.peek() < arr[i]){
+                s.add(arr[i]);
+                i += 1;
+            } else if(!s.isEmpty() && s.peek() >= arr[i]){
+                s.pop();
+            }
+        }
+        return s.stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    public int[] solution181918(int[] arr) {
+        List<Integer> l = new ArrayList<>();
+        int i = 0;
+        while(i < arr.length){
+            if(l.size() == 0){
+                l.add(arr[i]);
+                i += 1;
+            }
+            else if(l.size() > 0 && l.get(l.size()-1) < arr[i]) {
+                l.add(arr[i]);
+                i += 1;
+            }
+            else if(l.size() > 0 && l.get(l.size()-1) >= arr[i]){
+                l.remove(l.size()-1);
+            }
+        }
+        return l.stream().mapToInt(Integer::intValue).toArray();
+    }
+
+//    public int[] solution(int n) {
+//        return IntStream.concat(
+//                        IntStream.iterate(n, i -> i > 1, i -> i % 2 == 0 ? i / 2 : i * 3 + 1),
+//                        IntStream.of(1))
+//                .toArray();
+//    }
 
     /*
     * 스트림 연결하기
