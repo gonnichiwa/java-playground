@@ -296,6 +296,69 @@ public class StreamTest {
         System.out.println(answer);
     }
 
+    @Test
+    public void mapTest(){
+        Map<Integer, Integer> m = new HashMap<>();
+        m.put(1,1);
+        m.put(2,3);
+        m.put(3,1);
+    }
+
+    @Test
+    public void stringUpperLower(){
+        String ab = "adsgsg";
+
+        char a = 'a';
+        int result = (int) a;
+
+        if(result >= 97 && result <= 122) {
+            // lowercase
+            System.out.println("lowercase");
+        } else {
+            // uppercase
+            System.out.println("uppercase");
+        }
+
+    }
+
+    @Test
+    public void streamArrayTest(){
+        int[] num_list = {2,1,6};
+        int n = 3;
+        // result : [6]
+        int[] result = Arrays.stream(num_list).filter(num -> num >= n).toArray();
+
+    }
+
+    /*
+0 65  A     26  97  a
+1 66  B     27  98  b
+2 67  C         99  c
+3 68  D        100  d
+4 69  E        101  e
+  70  F        102  f
+  71  G        103  g
+  72  H        104  h
+  73  I        105  i
+74  J        106  j
+75  K        107  k
+76  L        108  l
+77  M        109  m
+78  N        110  n
+79  O        111  o
+80  P        112  p
+81  Q        113  q
+82  R        114  r
+83  S        115  s
+84  T        116  t
+85  U        117  u
+86  V        118  v
+87  W        119  w
+88  X        120  x
+89  Y        121  y
+90  Z        122  z
+    * */
+
     public int[] solution181918_stack(int[] arr){
         Stack<Integer> s = new Stack<>();
         int i = 0;
