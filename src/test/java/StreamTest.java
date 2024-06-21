@@ -569,6 +569,29 @@ public class StreamTest {
 
         System.out.println(a.toString() + b.toString());
     }
+
+    @Test
+    public void page(){
+        String[] printPages = getPages(122,126);
+        for(String p : printPages) {
+            System.out.println(p);
+        }
+    }
+
+    private String[] getPages(int start, int end) {
+        StringJoiner front = new StringJoiner(",");
+        StringJoiner back = new StringJoiner(",");
+        IntStream.rangeClosed(start,end).forEach(i -> {
+            if (i % 2 == 0) {
+                front.add(""+i);
+            } else {
+                back.add(""+i);
+            }
+        });
+        return new String[]{front.toString(), back.toString()};
+    }
+
+
 }
 
 class Counter {
