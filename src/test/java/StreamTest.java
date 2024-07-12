@@ -528,6 +528,33 @@ public class StreamTest {
         return new String[]{front.toString(), back.toString()};
     }
 
+    @Test
+    public void stringMulyiplyTest(){
+        String[] pictures = {".xx...xx.", "x..x.x..x", "x...x...x", ".x.....x.", "..x...x..", "...x.x...", "....x...."};
+        solution(pictures, 2);
+    }
+
+    public String[] solution(String[] picture, int k) {
+        String[] result = new String[picture.length*k];
+        StringBuilder picM = new StringBuilder();
+
+        for(int i = 0; i < picture.length; i++) {
+            String p = picture[i];
+            picM.setLength(0);
+            for(char a : p.toCharArray()){
+                for(int j = 1; j <= k; j++){
+                    picM.append(a);
+                }
+            }
+
+            for(int m = i*k; m < (i*k)+k; m++) {
+                result[m] = picM.toString();
+            }
+        }
+
+        return result;
+    }
+
 
 }
 
